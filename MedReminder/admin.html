@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedReminder Admin</title>
+    <link rel="stylesheet" href="css/styleadmin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        .logout-fixed {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border: none;
+            border-radius: 10px;
+            background: #fee2e2;
+            color: #dc2626;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            transition: 0.2s ease;
+        }
+
+        .logout-fixed:hover {
+            background: #fecaca;
+            transform: translateY(-2px);
+        }
+
+        /* Card expand */
+        .patient-top {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            user-select: none;
+        }
+
+        .patient-top:hover .toggle-icon {
+            color: #2563eb !important;
+        }
+
+        .patient-detail {
+            animation: expandIn 0.22s ease both;
+        }
+
+        @keyframes expandIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Badges */
+        .med-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid #bfdbfe;
+            border-radius: 999px;
+            font-size: 12.5px;
+            font-weight: 500;
+        }
+
+        .patient-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #f0fdf4;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+            border-radius: 999px;
+            font-size: 12.5px;
+            font-weight: 500;
+        }
+
+        /* Section label inside card */
+        .section-label {
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Detail table */
+        .detail-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+        }
+
+        .detail-table th {
+            background: #f9fafb;
+            color: #6b7280;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .detail-table td {
+            padding: 9px 12px;
+            border-bottom: 1px solid #f9fafb;
+            color: #374151;
+            vertical-align: middle;
+        }
+
+        .detail-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .detail-table tr:hover td {
+            background: #f9fafb;
+        }
+
+        /* Status badges */
+        .done {
+            display: inline-block;
+            padding: 3px 10px;
+            background: #dcfce7;
+            color: #16a34a;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .pending {
+            display: inline-block;
+            padding: 3px 10px;
+            background: #fef3c7;
+            color: #d97706;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body onload="loadData()">
+
+    <button onclick="logoutAdmin()" class="logout-fixed">
+        <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+    </button>
+
+    <div class="admin-layout">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <i class="fa-solid fa-capsules"></i>
+                <span>MedReminder</span>
+            </div>
+            <ul>
+                <li class="active" onclick="showDashboard()">
+                    <i class="fa-solid fa-chart-pie"></i> Dashboard
+                </li>
+                <li onclick="showPatients()">
+                    <i class="fa-solid fa-user"></i> Bệnh nhân
+                </li>
+                <li onclick="showMeds()">
+                    <i class="fa-solid fa-pills"></i> Loại thuốc
+                </li>
+                <li onclick="showSchedules()">
+                    <i class="fa-solid fa-clock"></i> Lịch uống thuốc
+                </li>
+                <li onclick="showStatistics()">
+                    <i class="fa-solid fa-chart-line"></i> Thống kê
+                </li>
+            </ul>
+        </aside>
+
+        <!-- MAIN -->
+        <main class="main-content">
+
+            <div class="topbar">
+                <div>
+                    <h1>Dashboard</h1>
+                    <p class="sub-text">Hệ thống quản lý thuốc thông minh</p>
+                </div>
+                <button onclick="openModal()" class="add-btn">
+                    <i class="fa-solid fa-plus"></i> Thêm lịch
+                </button>
+            </div>
+
+            <!-- DASHBOARD -->
+            <section id="dashboardSection">
+                <div class="stats">
+                    <div class="stat-card">
+                        <div>
+                            <h3 id="patientCount">0</h3>
+                            <p>Bệnh nhân</p>
+                        </div>
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <div class="stat-card">
+                        <div>
+                            <h3 id="medCount">0</h3>
+                            <p>Loại thuốc</p>
+                        </div>
+                        <i class="fa-solid fa-pills"></i>
+                    </div>
+                    <div class="stat-card">
+                        <div>
+                            <h3 id="successPercent">0%</h3>
+                            <p>Uống đúng giờ</p>
+                        </div>
+                        <i class="fa-solid fa-heart-pulse"></i>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEARCH PATIENTS -->
+            <div class="search-box" id="patientSearch" style="display:none;">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="searchInput" placeholder="Tìm bệnh nhân theo tên..." onkeyup="searchPatients()">
+            </div>
+
+            <!-- SEARCH MEDS -->
+            <div class="search-box" id="medSearch" style="display:none;">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="medSearchInput" placeholder="Tìm thuốc theo tên..." onkeyup="searchMeds()">
+            </div>
+
+            <!-- PATIENTS -->
+            <section id="patientsSection" style="display:none;">
+                <div class="table-section">
+                    <div class="table-header">
+                        <h2>Danh sách bệnh nhân</h2>
+                    </div>
+                    <div id="patientCards" class="patient-grid"></div>
+                </div>
+            </section>
+
+            <!-- MEDS -->
+            <section id="medsSection" style="display:none;">
+                <div class="table-section">
+                    <div class="table-header">
+                        <h2>Danh sách loại thuốc</h2>
+                    </div>
+                    <div id="medCards" class="patient-grid"></div>
+                </div>
+            </section>
+
+            <!-- SCHEDULES -->
+            <section id="scheduleSection" style="display:none;">
+                <div class="table-section">
+                    <div class="table-header">
+                        <h2>Lịch uống thuốc</h2>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Bệnh nhân</th>
+                                <th>Thuốc</th>
+                                <th>Ngày</th>
+                                <th>Giờ</th>
+                                <th>Trạng thái</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scheduleTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- STATISTICS -->
+            <section id="statisticsSection" style="display:none;">
+                <div class="table-section">
+                    <div class="table-header">
+                        <h2>Thống kê uống thuốc</h2>
+                    </div>
+                    <div id="statisticsCards"></div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Thêm lịch uống thuốc</h2>
+                <button onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="scheduleForm">
+                <div class="form-group">
+                    <label>Bệnh nhân</label>
+                    <input type="text" id="patientSelect" required placeholder="Nhập tên bệnh nhân">
+                </div>
+                <div class="form-group">
+                    <label>Thuốc</label>
+                    <input type="text" id="medSelect" required placeholder="Nhập tên thuốc">
+                </div>
+                <div class="form-group">
+                    <label>Ngày uống</label>
+                    <input type="date" id="dateInput" required>
+                </div>
+                <div class="form-group">
+                    <label>Giờ uống</label>
+                    <input type="time" id="timeInput" required>
+                </div>
+                <button type="submit" class="submit-btn">Lưu lịch</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+
+    <script>
+        // Hiện/ẩn search box theo tab
+        const _origShowPatients = showPatients;
+        const _origShowMeds = showMeds;
+        const _origShowDashboard = showDashboard;
+        const _origShowSchedules = showSchedules;
+        const _origShowStatistics = showStatistics;
+
+        function hideAllSearch() {
+            document.getElementById("patientSearch").style.display = "none";
+            document.getElementById("medSearch").style.display = "none";
+        }
+
+        showPatients = function () {
+            _origShowPatients();
+            hideAllSearch();
+            document.getElementById("patientSearch").style.display = "flex";
+        };
+        showMeds = function () {
+            _origShowMeds();
+            hideAllSearch();
+            document.getElementById("medSearch").style.display = "flex";
+        };
+        showDashboard = function () { _origShowDashboard(); hideAllSearch(); };
+        showSchedules = function () { _origShowSchedules(); hideAllSearch(); };
+        showStatistics = function () { _origShowStatistics(); hideAllSearch(); };
+    </script>
+
+</body>
+
+</html>

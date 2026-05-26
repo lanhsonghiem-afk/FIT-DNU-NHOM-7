@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedReminder</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="sidebar-logo">
+            <i class="fa-solid fa-capsules"></i>
+            <span>MedReminder</span>
+        </div>
+
+        <ul>
+
+            <li class="active">
+                <i class="fa-solid fa-house"></i>
+                Trang chủ
+            </li>
+
+            <li onclick="openReport()">
+                <i class="fa-solid fa-chart-line"></i>
+                Báo cáo sức khỏe
+            </li>
+
+            <li onclick="openSchedule()">
+                <i class="fa-solid fa-clock"></i>
+                Lịch uống thuốc
+            </li>
+
+        </ul>
+
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+
+        <!-- TOPBAR -->
+        <div class="topbar">
+            <div>
+                <h1>Hệ thống quản lý thuốc thông minh</h1>
+                <p class="sub-text">
+                    Theo dõi sức khỏe và nhắc uống thuốc mỗi ngày một cách chuyên nghiệp
+                </p>
+            </div>
+            <button class="login-btn" id="loginBtn" onclick="showLoginModal()">
+                <i class="fa-solid fa-user"></i>
+                Đăng nhập
+            </button>
+        </div>
+
+        <!-- SCHEDULE -->
+        <section id="scheduleSection" style="display:none;">
+            <table>
+                <tbody id="scheduleTableBody"></tbody>
+            </table>
+        </section>
+        <section class="report-section" id="reportSection"></section>
+        <!-- HERO -->
+        <section class="hero-section">
+
+            <div class="hero-left">
+
+                <h2>
+                    Chăm sóc sức khỏe
+                    <span>thông minh hơn</span>
+                </h2>
+
+                <p>
+                    MedReminder giúp người dùng theo dõi lịch uống thuốc, quản lý sức khỏe và nhận thông báo đúng giờ
+                    mỗi ngày.
+                </p>
+
+                <button onclick="openSchedule()">
+                    Xem lịch uống thuốc
+                </button>
+
+            </div>
+
+            <div class="hero-right">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS8tLAiOs8x44UtiAvJ8HSTCErNILAkvxVZ3A&s"
+                    alt="">
+            </div>
+
+        </section>
+
+        <!-- STATS -->
+        <section class="stats">
+
+            <div class="stat-card">
+                <div>
+                    <h3>1200+</h3>
+                    <p>Bệnh nhân sử dụng</p>
+                </div>
+                <i class="fa-solid fa-user"></i>
+            </div>
+
+            <div class="stat-card">
+                <div>
+                    <h3>98%</h3>
+                    <p>Uống thuốc đúng giờ</p>
+                </div>
+                <i class="fa-solid fa-heart-pulse"></i>
+            </div>
+
+            <div class="stat-card">
+                <div>
+                    <h3>24/7</h3>
+                    <p>Hệ thống hoạt động</p>
+                </div>
+                <i class="fa-solid fa-clock"></i>
+            </div>
+
+        </section>
+
+        <!-- REPORT -->
+        <section class="report-section">
+
+            <div class="section-header">
+                <h2>Báo cáo sức khỏe hôm nay</h2>
+            </div>
+
+            <div class="report-grid">
+
+                <div class="report-card">
+                    <i class="fa-solid fa-temperature-half"></i>
+                    <h3>Thân nhiệt ổn định</h3>
+                    <p>Chỉ số cơ thể hiện tại đang ở trạng thái bình thường.</p>
+                </div>
+
+                <div class="report-card">
+                    <i class="fa-solid fa-heart"></i>
+                    <h3>Nhịp tim ổn định</h3>
+                    <p>Theo dõi nhịp tim theo thời gian thực.</p>
+                </div>
+
+                <div class="report-card">
+                    <i class="fa-solid fa-pills"></i>
+                    <h3>Nhắc uống thuốc</h3>
+                    <p>Hệ thống tự động nhắc đúng giờ uống thuốc.</p>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- NEWS -->
+        <div class="news-grid">
+
+            <a class="news-card"
+                href="https://nhathuoclongchau.com.vn/bai-viet/bat-mi-6-thoi-quen-lanh-manh-nang-cao-chat-luong-cuoc-song.html"
+                target="_blank">
+                <img
+                    src="https://cdn.nhathuoclongchau.com.vn/unsafe/800x0/bat_mi_6_thoi_quen_lanh_manh_nang_cao_chat_luong_cuoc_song_1_f5d3cba60e.jpg">
+                <div class="news-content">
+                    <h3>Bật mí 6 thói quen lành mạnh</h3>
+                    <p>Cải thiện sức khỏe và tinh thần mỗi ngày.</p>
+                </div>
+            </a>
+
+            <a class="news-card"
+                href="https://medlatec.vn/tin-tuc/cach-an-uong-khoa-hoc-du-duong-chat-bao-dam-suc-khoe--s51-n30016"
+                target="_blank">
+                <img src="https://login.medlatec.vn//ImagePath/images/20220917/20220917_cach-an-uong-khoa-hoc-1.jpg">
+                <div class="news-content">
+                    <h3>Ăn uống khoa học</h3>
+                    <p>Dinh dưỡng hợp lý giúp cơ thể khỏe mạnh.</p>
+                </div>
+            </a>
+
+            <a class="news-card"
+                href="https://medinet.gov.vn/quan-ly-chat-luong-kham-chua-benh/tim-hieu-nen-tang-cong-nghe-cho-suc-khoe-thong-minh-so-y-te-hcm-c8-11449.aspx"
+                target="_blank">
+                <img src="https://vinuni.edu.vn/wp-content/uploads/2025/11/ung-dung-ai-trong-y-te-1.jpg">
+                <div class="news-content">
+                    <h3>Công nghệ sức khỏe thông minh</h3>
+                    <p>Ứng dụng AI trong y tế hiện đại.</p>
+                </div>
+            </a>
+
+        </div>
+
+    </main>
+
+    <!-- JS -->
+    <script src="js/main.js" defer></script>
+
+</body>
+
+</html>
