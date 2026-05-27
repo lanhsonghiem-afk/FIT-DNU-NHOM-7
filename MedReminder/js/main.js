@@ -28,13 +28,11 @@ function logout() {
 
 // =======================
 // LẤY PATIENT CỦA USER HIỆN TẠI
-// So khớp theo email (ưu tiên) hoặc username/name
 // =======================
 function getCurrentPatient() {
     const user = getUser();
     if (!user || !patients.length) return null;
 
-    // Admin xem tất cả → trả null để không lọc
     if (user.role === "admin") return null;
 
     return patients.find(p =>
@@ -52,17 +50,14 @@ function getFilteredSchedules() {
     const user = getUser();
     if (!user) return [];
 
-    // Admin thấy tất cả
     if (user.role === "admin") return schedules;
 
     const patient = getCurrentPatient();
 
-    // Có patient khớp → lọc theo patientId
     if (patient) {
         return schedules.filter(s => String(s.patientId) === String(patient.id));
     }
 
-    // Không khớp patient nào → trả mảng rỗng (không lộ data người khác)
     return [];
 }
 
@@ -160,10 +155,8 @@ function renderSchedules() {
     const pct = total > 0 ? Math.round((done / total) * 100) : 0;
     const barColor = pct >= 80 ? "#16a34a" : pct >= 50 ? "#f59e0b" : "#ef4444";
 
-    // Tên hiển thị: ưu tiên tên patient nếu khớp, rồi đến tên user
     const displayName = patient?.name || user?.name || user?.username || user?.email || "bạn";
 
-    // Cảnh báo nếu user không khớp patient nào (không phải admin)
     const noPatientWarning = (!patient && user?.role !== "admin")
         ? `<div style="
                 padding:12px 16px;margin-bottom:16px;
@@ -174,6 +167,83 @@ function renderSchedules() {
                Vui lòng liên hệ quản trị viên.
            </div>`
         : "";
+
+    // ✅ FIX: Group schedules theo ngày, sắp xếp ngày tăng dần
+    const byDate = {};
+    mySchedules.forEach(s => {
+        (byDate[s.date] ??= []).push(s);
+    });
+    const sortedDates = Object.keys(byDate).sort();
+
+    const daysHtml = sortedDates.length === 0
+        ? `<p style="text-align:center;color:#888;padding:40px;">Không có lịch uống thuốc nào.</p>`
+        : sortedDates.map(date => {
+            const daySchedules = byDate[date];
+            const dayDone = daySchedules.filter(s => s.status).length;
+            const dayTotal = daySchedules.length;
+
+            const cardsHtml = daySchedules.map(s => {
+                const p = patients.find(x => x.id == s.patientId);
+                const m = meds.find(x => x.id == s.medicationId);
+                const isDone = s.status;
+                return `
+                    <div style="
+                        display:flex;align-items:center;justify-content:space-between;gap:12px;
+                        padding:16px 20px;
+                        background:${isDone ? "#f0fdf4" : "#fff"};
+                        border:1px solid ${isDone ? "#86efac" : "#e5e7eb"};
+                        border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,0.05);
+                    ">
+                        <div style="flex:1;">
+                            <div style="font-size:15px;font-weight:600;margin-bottom:6px;color:${isDone ? "#15803d" : "#111827"};">
+                                💊 ${m?.name || "N/A"}
+                                <span style="
+                                    font-size:11px;font-weight:500;padding:2px 8px;
+                                    border-radius:999px;margin-left:8px;
+                                    background:${isDone ? "#dcfce7" : "#fef3c7"};
+                                    color:${isDone ? "#16a34a" : "#d97706"};
+                                ">${isDone ? "✅ Đã uống" : "⏳ Chưa uống"}</span>
+                            </div>
+                            <div style="display:flex;gap:16px;flex-wrap:wrap;">
+                                <span style="font-size:13px;color:#6b7280;">👤 ${p?.name || "N/A"}</span>
+                                <span style="font-size:13px;color:#6b7280;">🕐 ${s.time}</span>
+                                ${m?.dosage ? `<span style="font-size:13px;color:#6b7280;">💉 ${m.dosage}</span>` : ""}
+                                ${m?.description ? `<span style="font-size:13px;color:#6b7280;">📝 ${m.description}</span>` : ""}
+                            </div>
+                        </div>
+                        ${isDone
+                        ? `<div style="padding:8px 16px;border-radius:8px;background:#dcfce7;color:#16a34a;font-size:14px;font-weight:600;white-space:nowrap;">✅ Hoàn thành</div>`
+                        : `<button data-id="${s.id}" onclick="markAsTaken('${s.id}')"
+                                    style="padding:8px 16px;border:none;border-radius:8px;background:#2563eb;color:#fff;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;"
+                                    onmouseover="this.style.background='#1d4ed8'"
+                                    onmouseout="this.style.background='#2563eb'"
+                               >💊 Đã uống</button>`
+                    }
+                    </div>
+                `;
+            }).join("");
+
+            return `
+                <div style="margin-bottom:24px;">
+                    <div style="
+                        display:flex;align-items:center;justify-content:space-between;
+                        margin-bottom:12px;padding-bottom:8px;
+                        border-bottom:2px solid #e5e7eb;
+                    ">
+                        <h3 style="margin:0;font-size:16px;color:#374151;">📅 ${date}</h3>
+                        <span style="
+                            font-size:12px;font-weight:600;padding:3px 10px;
+                            border-radius:999px;
+                            background:${dayDone === dayTotal ? "#dcfce7" : "#fef3c7"};
+                            color:${dayDone === dayTotal ? "#16a34a" : "#d97706"};
+                        ">${dayDone}/${dayTotal} đã uống</span>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:12px;">
+                        ${cardsHtml}
+                    </div>
+                </div>
+            `;
+        }).join("");
 
     section.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
@@ -212,52 +282,7 @@ function renderSchedules() {
 
         ${noPatientWarning}
 
-        <div style="display:flex;flex-direction:column;gap:12px;">
-            ${mySchedules.length === 0
-            ? `<p style="text-align:center;color:#888;padding:40px;">Không có lịch uống thuốc nào.</p>`
-            : mySchedules.map(s => {
-                const p = patients.find(x => x.id == s.patientId);
-                const m = meds.find(x => x.id == s.medicationId);
-                const isDone = s.status;
-                return `
-                        <div style="
-                            display:flex;align-items:center;justify-content:space-between;gap:12px;
-                            padding:16px 20px;
-                            background:${isDone ? "#f0fdf4" : "#fff"};
-                            border:1px solid ${isDone ? "#86efac" : "#e5e7eb"};
-                            border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,0.05);
-                        ">
-                            <div style="flex:1;">
-                                <div style="font-size:15px;font-weight:600;margin-bottom:6px;color:${isDone ? "#15803d" : "#111827"};">
-                                    💊 ${m?.name || "N/A"}
-                                    <span style="
-                                        font-size:11px;font-weight:500;padding:2px 8px;
-                                        border-radius:999px;margin-left:8px;
-                                        background:${isDone ? "#dcfce7" : "#fef3c7"};
-                                        color:${isDone ? "#16a34a" : "#d97706"};
-                                    ">${isDone ? "✅ Đã uống" : "⏳ Chưa uống"}</span>
-                                </div>
-                                <div style="display:flex;gap:16px;flex-wrap:wrap;">
-                                    <span style="font-size:13px;color:#6b7280;">👤 ${p?.name || "N/A"}</span>
-                                    <span style="font-size:13px;color:#6b7280;">📅 ${s.date}</span>
-                                    <span style="font-size:13px;color:#6b7280;">🕐 ${s.time}</span>
-                                    ${m?.dosage ? `<span style="font-size:13px;color:#6b7280;">💉 ${m.dosage}</span>` : ""}
-                                    ${m?.description ? `<span style="font-size:13px;color:#6b7280;">📝 ${m.description}</span>` : ""}
-                                </div>
-                            </div>
-                            ${isDone
-                        ? `<div style="padding:8px 16px;border-radius:8px;background:#dcfce7;color:#16a34a;font-size:14px;font-weight:600;white-space:nowrap;">✅ Hoàn thành</div>`
-                        : `<button data-id="${s.id}" onclick="markAsTaken('${s.id}')"
-                                        style="padding:8px 16px;border:none;border-radius:8px;background:#2563eb;color:#fff;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;"
-                                        onmouseover="this.style.background='#1d4ed8'"
-                                        onmouseout="this.style.background='#2563eb'"
-                                   >💊 Đã uống</button>`
-                    }
-                        </div>
-                    `;
-            }).join("")
-        }
-        </div>
+        ${daysHtml}
     `;
 }
 
@@ -274,16 +299,18 @@ function renderReport() {
     const pending = total - done;
     const rate = total > 0 ? Math.round((done / total) * 100) : 0;
 
-    // Admin thấy tổng bệnh nhân, user thường chỉ thấy của mình
     const user = getUser();
     const patient = getCurrentPatient();
     const patientCount = user?.role === "admin" ? patients.length : (patient ? 1 : 0);
+
+    // ✅ FIX: Đếm số loại thuốc thực sự trong lịch của user, không dùng meds.length
+    const uniqueMedCount = new Set(mySchedules.map(s => s.medicationId)).size;
 
     section.innerHTML = `
         <div class="section-header"><h2>📊 Báo cáo sức khỏe</h2></div>
         <div class="report-grid">
             <div class="report-card"><i class="fa-solid fa-users"></i><h3>${patientCount}</h3><p>Bệnh nhân</p></div>
-            <div class="report-card"><i class="fa-solid fa-pills"></i><h3>${meds.length}</h3><p>Loại thuốc</p></div>
+            <div class="report-card"><i class="fa-solid fa-pills"></i><h3>${uniqueMedCount}</h3><p>Loại thuốc</p></div>
             <div class="report-card"><i class="fa-solid fa-calendar-check"></i><h3>${done} / ${total}</h3><p>Lịch đã uống</p></div>
             <div class="report-card"><i class="fa-solid fa-chart-pie"></i><h3>${rate}%</h3><p>Tỉ lệ tuân thủ</p></div>
         </div>
