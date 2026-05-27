@@ -131,7 +131,7 @@ document.addEventListener("DOMContentLoaded", function () {
     users.push({
         id: Date.now(),
         username: "admin",
-        email: "admin@medreminder.com",
+        email: "admin@gmail.com",
         password: "123456",
         role: "admin",
         createdAt: new Date().toISOString()
