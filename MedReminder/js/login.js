@@ -1,142 +1,104 @@
+// ============================================================
+//  login.js – Đăng nhập / đăng ký (phiên bản nâng cấp)
+//  MedReminder – Đề tài 09
+// ============================================================
+
+// Tài khoản demo – mỗi user có patientId riêng để lọc dữ liệu
+const DEMO_ACCOUNTS = [
+    { username: "admin", password: "admin123", role: "admin", name: "Quản trị viên", patientId: null },
+    { username: "bsminh", password: "123456", role: "doctor", name: "BS. Nguyễn Văn Minh", patientId: null },
+    { username: "patient", password: "patient123", role: "patient", name: "Nguyễn Văn An", patientId: "1" },
+];
+
 document.addEventListener("DOMContentLoaded", function () {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("register") === "true") switchToRegister();
+    document.getElementById("login-form")?.addEventListener("submit", handleLogin);
+    document.getElementById("register-form")?.addEventListener("submit", handleRegister);
+});
 
-    // =======================
-    // TOGGLE LOGIN / REGISTER
-    // =======================
-    window.toggleRegister = function (showRegister) {
-        document.getElementById("loginSection").style.display = showRegister ? "none" : "block";
-        document.getElementById("registerSection").style.display = showRegister ? "block" : "none";
-    };
+function handleLogin(e) {
+    e.preventDefault();
+    const usernameEl = document.getElementById("username");
+    const passwordEl = document.getElementById("password");
+    const errUser = document.getElementById("err-username");
+    const errPass = document.getElementById("err-password");
+    let valid = true;
 
-    // =======================
-    // ĐĂNG NHẬP
-    // =======================
-    const loginForm = document.getElementById("loginForm");
+    if (!usernameEl.value.trim()) {
+        usernameEl.classList.add("is-invalid");
+        errUser.textContent = "Vui lòng nhập tên đăng nhập.";
+        errUser.classList.add("show"); valid = false;
+    } else { usernameEl.classList.remove("is-invalid"); errUser.classList.remove("show"); }
 
-    loginForm.addEventListener("submit", function (e) {
-        e.preventDefault();
+    if (!passwordEl.value.trim()) {
+        passwordEl.classList.add("is-invalid");
+        errPass.textContent = "Vui lòng nhập mật khẩu.";
+        errPass.classList.add("show"); valid = false;
+    } else { passwordEl.classList.remove("is-invalid"); errPass.classList.remove("show"); }
 
-        const email = loginForm.querySelector("input[type='email']").value.trim();
-        const password = loginForm.querySelector("input[type='password']").value.trim();
+    if (!valid) return;
 
-        if (!email || !password) {
-            alert("Vui lòng nhập đầy đủ!");
-            return;
-        }
+    const btn = e.target.querySelector('[type=submit]');
+    btn.textContent = "Đang đăng nhập..."; btn.disabled = true;
 
-        let users = JSON.parse(localStorage.getItem("users")) || [];
-
-        const foundUser = users.find(u =>
-            u.email === email && u.password === password
+    setTimeout(() => {
+        const account = DEMO_ACCOUNTS.find(
+            a => a.username === usernameEl.value.trim() && a.password === passwordEl.value
         );
-
-        if (!foundUser) {
-            alert("Sai tài khoản hoặc mật khẩu!");
-            return;
-        }
-
-        // Lưu trạng thái đăng nhập
-        localStorage.setItem("currentUser", JSON.stringify(foundUser));
-        localStorage.setItem("isLogin", "true");
-
-        alert("Đăng nhập thành công 😆");
-
-        // Redirect theo role / returnTo
-        const returnTo = localStorage.getItem("returnTo");
-        localStorage.removeItem("returnTo");
-
-        if (foundUser.role === "admin") {
-            window.location.href = "admin.html";
-        } else if (returnTo) {
-            window.location.href = returnTo;
+        if (account) {
+            sessionStorage.setItem("medreminder_user", JSON.stringify(account));
+            if (account.role === "admin" || account.role === "doctor") {
+                window.location.href = "admin.html";
+            } else {
+                window.location.href = "index.html";
+            }
         } else {
-            window.location.href = "index.html";
+            passwordEl.classList.add("is-invalid");
+            errPass.textContent = "Tên đăng nhập hoặc mật khẩu không đúng.";
+            errPass.classList.add("show");
+            btn.textContent = "Đăng nhập →"; btn.disabled = false;
         }
-    });
+    }, 800);
+}
 
-    // =======================
-    // ĐĂNG KÝ
-    // =======================
-    window.register = function () {
-        const username = document.getElementById("registerUsername").value.trim();
-        const email = document.getElementById("registerEmail").value.trim();
-        const password = document.getElementById("registerPassword").value.trim();
-        const confirm = document.getElementById("registerConfirm").value.trim();
-
-        // Validation
-        if (!username || !email || !password || !confirm) {
-            alert("Vui lòng nhập đầy đủ thông tin!");
-            return;
-        }
-
-        if (!isValidEmail(email)) {
-            alert("Email không hợp lệ!");
-            return;
-        }
-
-        if (password.length < 6) {
-            alert("Mật khẩu phải có ít nhất 6 ký tự!");
-            return;
-        }
-
-        if (password !== confirm) {
-            alert("Mật khẩu xác nhận không khớp!");
-            return;
-        }
-
-        // Kiểm tra email trùng
-        let users = JSON.parse(localStorage.getItem("users")) || [];
-
-        if (users.some(u => u.email === email)) {
-            alert("Email này đã được đăng ký!");
-            return;
-        }
-
-        // Tạo user mới
-        const newUser = {
-            id: Date.now(),
-            username: username,
-            email: email,
-            password: password,
-            role: "user",
-            createdAt: new Date().toISOString()
-        };
-
-        users.push(newUser);
-        localStorage.setItem("users", JSON.stringify(users));
-
-        alert("Đăng ký thành công! Vui lòng đăng nhập 🎉");
-
-        // Reset form và quay về đăng nhập
-        document.getElementById("registerForm").reset();
-        toggleRegister(false);
+function handleRegister(e) {
+    e.preventDefault();
+    const name = document.getElementById("reg-name");
+    const user = document.getElementById("reg-username");
+    const pass = document.getElementById("reg-password");
+    const pass2 = document.getElementById("reg-password2");
+    let valid = true;
+    const check = (el, errId, condition, msg) => {
+        const err = document.getElementById(errId);
+        if (!condition) { el.classList.add("is-invalid"); err.textContent = msg; err.classList.add("show"); valid = false; }
+        else { el.classList.remove("is-invalid"); err.classList.remove("show"); }
     };
+    check(name, "err-reg-name", name.value.trim(), "Vui lòng nhập họ tên.");
+    check(user, "err-reg-user", user.value.trim(), "Vui lòng nhập tên đăng nhập.");
+    check(pass, "err-reg-pass", pass.value.length >= 6, "Mật khẩu ít nhất 6 ký tự.");
+    check(pass2, "err-reg-pass2", pass.value === pass2.value, "Mật khẩu xác nhận không khớp.");
+    if (!valid) return;
+    const btn = e.target.querySelector('[type=submit]');
+    btn.textContent = "Đang đăng ký..."; btn.disabled = true;
+    setTimeout(() => {
+        showSuccessMsg("Đăng ký thành công! Chuyển đến đăng nhập...");
+        setTimeout(switchToLogin, 1500);
+        btn.textContent = "Đăng ký →"; btn.disabled = false;
+    }, 900);
+}
 
-    // =======================
-    // HELPER
-    // =======================
-    function isValidEmail(email) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    }
-
-});// =======================
-// TẠO ADMIN MẶC ĐỊNH (chạy 1 lần)
-// =======================
-(function createDefaultAdmin() {
-    let users = JSON.parse(localStorage.getItem("users")) || [];
-
-    const adminExists = users.some(u => u.role === "admin");
-    if (adminExists) return; // đã có admin rồi thì thôi
-
-    users.push({
-        id: Date.now(),
-        username: "admin",
-        email: "admin@gmail.com",
-        password: "123456",
-        role: "admin",
-        createdAt: new Date().toISOString()
-    });
-
-    localStorage.setItem("users", JSON.stringify(users));
-    console.log("✅ Tài khoản admin đã được tạo: admin@medreminder.com / admin123");
-})();
+function switchToRegister() {
+    $("#login-section").slideUp(250, function () { $("#register-section").slideDown(250); });
+}
+function switchToLogin() {
+    $("#register-section").slideUp(250, function () { $("#login-section").slideDown(250); });
+}
+function showSuccessMsg(msg) {
+    const el = document.getElementById("success-msg");
+    if (el) { el.textContent = msg; $(el).fadeIn(300); }
+}
+function fillDemo(username, password) {
+    document.getElementById("username").value = username;
+    document.getElementById("password").value = password;
+}
