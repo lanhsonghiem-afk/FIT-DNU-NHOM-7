@@ -2,197 +2,466 @@
 <html lang="vi">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedReminder</title>
-
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MedReminder – Quản lý Lịch Uống Thuốc</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="css/style.css" />
 </head>
 
 <body>
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
 
-        <div class="sidebar-logo">
-            <i class="fa-solid fa-capsules"></i>
-            <span>MedReminder</span>
+    <!-- Toast container -->
+    <div id="toast-container" class="position-fixed top-0 end-0 p-3" style="z-index:9999">
+        <div id="liveToast" class="toast toast-med" role="alert">
+            <div class="toast-body" id="toast-body"></div>
         </div>
+    </div>
 
-        <ul>
+    <!-- ═══ NAVBAR ═══ -->
+    <nav class="navbar-med">
+        <div class="container">
+            <div class="d-flex align-items-center justify-content-between w-100 gap-2 flex-wrap">
+                <a href="index.html" class="navbar-brand-med">
+                    <div class="brand-icon">💊</div>MedReminder
+                </a>
 
-            <li class="active">
-                <i class="fa-solid fa-house"></i>
-                Trang chủ
-            </li>
+                <!-- Global Search Bar -->
+                <div class="navbar-search-wrap" id="navbar-search-wrap">
+                    <span class="search-icon-nav"><i class="bi bi-search"></i></span>
+                    <input type="text" id="global-search" placeholder="Tìm thuốc, thông tin y tế..."
+                        autocomplete="off" />
+                    <div class="search-dropdown" id="search-dropdown"></div>
+                </div>
 
-            <li onclick="openReport()">
-                <i class="fa-solid fa-chart-line"></i>
-                Báo cáo sức khỏe
-            </li>
+                <!-- Nav Tabs -->
+                <div class="d-flex align-items-center gap-1 flex-wrap nav-tabs-med">
+                    <a href="#" class="nav-link-med active" data-tab="home" onclick="switchTab('home',event)">🏠 Trang
+                        chủ</a>
+                    <a href="#" class="nav-link-med" data-tab="schedule" onclick="switchTab('schedule',event)">📅 Lịch
+                        uống thuốc</a>
+                    <a href="#" class="nav-link-med" data-tab="medicines" onclick="switchTab('medicines',event)">💊
+                        Thuốc & Sản phẩm</a>
+                    <a href="#" class="nav-link-med" data-tab="news" onclick="switchTab('news',event)">📰 Tin tức y
+                        tế</a>
+                </div>
 
-            <li onclick="openSchedule()">
-                <i class="fa-solid fa-clock"></i>
-                Lịch uống thuốc
-            </li>
-
-        </ul>
-
-    </aside>
-
-    <!-- MAIN -->
-    <main class="main-content">
-
-        <!-- TOPBAR -->
-        <div class="topbar">
-            <div>
-                <h1>Hệ thống quản lý thuốc thông minh</h1>
-                <p class="sub-text">
-                    Theo dõi sức khỏe và nhắc uống thuốc mỗi ngày một cách chuyên nghiệp
-                </p>
+                <div class="d-flex align-items-center gap-2" id="nav-auth-area">
+                    <a href="login.html" class="btn-outline-med" style="font-size:0.82rem;padding:8px 16px"
+                        id="nav-login-btn">Đăng nhập</a>
+                    <a href="admin.html" class="btn-nav-admin" id="nav-admin-btn" style="display:none">⚙️ Quản trị</a>
+                    <button class="btn-logout-sm" id="nav-logout-btn" style="display:none" onclick="logoutUser()">🚪
+                        Đăng xuất</button>
+                </div>
             </div>
-            <button class="login-btn" id="loginBtn" onclick="showLoginModal()">
-                <i class="fa-solid fa-user"></i>
-                Đăng nhập
-            </button>
         </div>
+    </nav>
 
-        <!-- SCHEDULE -->
-        <section id="scheduleSection" style="display:none;">
-            <table>
-                <tbody id="scheduleTableBody"></tbody>
-            </table>
-        </section>
-        <section class="report-section" id="reportSection"></section>
+    <!-- ═══ TAB: HOME ═══ -->
+    <div id="tab-home" class="tab-content-med active">
         <!-- HERO -->
         <section class="hero-section">
-
-            <div class="hero-left">
-
-                <h2>
-                    Chăm sóc sức khỏe
-                    <span>thông minh hơn</span>
-                </h2>
-
-                <p>
-                    MedReminder giúp người dùng theo dõi lịch uống thuốc, quản lý sức khỏe và nhận thông báo đúng giờ
-                    mỗi ngày.
-                </p>
-
-                <button onclick="openSchedule()">
-                    Xem lịch uống thuốc
-                </button>
-
+            <div class="container">
+                <div class="user-banner" id="user-banner" style="display:none">
+                    <div class="user-banner-info">
+                        <div class="user-avatar" id="banner-avatar">👤</div>
+                        <div>
+                            <div class="user-name" id="banner-name">–</div>
+                            <div class="user-role" id="banner-role">–</div>
+                        </div>
+                    </div>
+                    <div style="font-size:0.82rem;color:var(--text-muted)">
+                        📅 Đang xem lịch của: <strong id="banner-patient" style="color:var(--primary)">–</strong>
+                    </div>
+                </div>
+                <div class="row align-items-center g-5">
+                    <div class="col-lg-6">
+                        <div class="hero-badge"><span>🏥</span> Ứng dụng y tế số 1 Việt Nam</div>
+                        <h1 class="hero-title">Quản lý<br><span>Lịch Uống Thuốc</span><br>Thông Minh</h1>
+                        <p class="hero-subtitle">Theo dõi lịch uống thuốc hàng ngày, nhận nhắc nhở kịp thời và đảm bảo
+                            không bỏ sót liều thuốc quan trọng nào.</p>
+                        <div class="d-flex gap-3 flex-wrap mb-4">
+                            <a href="#" class="btn-primary-med" onclick="switchTab('schedule',event)">📅 Xem lịch hôm
+                                nay</a>
+                            <a href="#" class="btn-outline-med" onclick="switchTab('medicines',event)">💊 Danh sách
+                                thuốc</a>
+                        </div>
+                        <div class="hero-stats">
+                            <div class="hero-stat"><span class="num" id="hero-stat-meds">–</span><span
+                                    class="label">Loại thuốc</span></div>
+                            <div class="hero-stat"
+                                style="padding:0 20px;border-left:1px solid rgba(255,255,255,0.1);border-right:1px solid rgba(255,255,255,0.1)">
+                                <span class="num" id="hero-stat-patients">–</span><span class="label">Bệnh nhân</span>
+                            </div>
+                            <div class="hero-stat"><span class="num">98%</span><span class="label">Tỉ lệ tuân thủ</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="hero-img-wrap">
+                            <div class="hero-img-bg">
+                                <span class="hero-center-icon">💊</span>
+                                <div class="hero-float-card" style="top:20px;right:-10px">⏰ Nhắc nhở lúc 07:00</div>
+                                <div class="hero-float-card" style="bottom:30px;left:-20px">✅ <span
+                                        id="float-taken">3</span>/5 liều đã uống</div>
+                                <div class="hero-float-card" style="top:55%;right:-50px">📦 Còn 14 viên</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            <div class="hero-right">
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS8tLAiOs8x44UtiAvJ8HSTCErNILAkvxVZ3A&s"
-                    alt="">
-            </div>
-
         </section>
 
-        <!-- STATS -->
-        <section class="stats">
-
-            <div class="stat-card">
-                <div>
-                    <h3>1200+</h3>
-                    <p>Bệnh nhân sử dụng</p>
+        <!-- QUICK FEATURE CARDS -->
+        <section style="position:relative;z-index:1;padding:0 0 60px">
+            <div class="container">
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-md-3">
+                        <div class="feature-quick-card" onclick="switchTab('schedule',null)">
+                            <div class="fq-icon">📅</div>
+                            <div class="fq-label">Lịch uống thuốc</div>
+                            <div class="fq-sub">Xem & đánh dấu</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="feature-quick-card" onclick="switchTab('medicines',null)">
+                            <div class="fq-icon">💊</div>
+                            <div class="fq-label">Tra cứu thuốc</div>
+                            <div class="fq-sub">500+ sản phẩm</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="feature-quick-card" onclick="switchTab('news',null)">
+                            <div class="fq-icon">📰</div>
+                            <div class="fq-label">Tin tức y tế</div>
+                            <div class="fq-sub">Cập nhật mới nhất</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="feature-quick-card" onclick="toggleChatbot()">
+                            <div class="fq-icon">🩺</div>
+                            <div class="fq-label">Bác sĩ ảo</div>
+                            <div class="fq-sub">Hỗ trợ 24/7</div>
+                        </div>
+                    </div>
                 </div>
-                <i class="fa-solid fa-user"></i>
-            </div>
 
-            <div class="stat-card">
-                <div>
-                    <h3>98%</h3>
-                    <p>Uống thuốc đúng giờ</p>
+                <!-- Preview stats -->
+                <div class="row g-3">
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card"><span class="stat-icon">💊</span>
+                            <div class="stat-value" id="stat-total">–</div>
+                            <div class="stat-label">Lịch hôm nay</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card"><span class="stat-icon">✅</span>
+                            <div class="stat-value" id="stat-taken" style="color:#4caf50">–</div>
+                            <div class="stat-label">Đã uống</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card"><span class="stat-icon">⏳</span>
+                            <div class="stat-value" id="stat-remain" style="color:#ffc107">–</div>
+                            <div class="stat-label">Chờ uống</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card"><span class="stat-icon">❌</span>
+                            <div class="stat-value" id="stat-missed" style="color:var(--accent)">–</div>
+                            <div class="stat-label">Bỏ lỡ</div>
+                        </div>
+                    </div>
                 </div>
-                <i class="fa-solid fa-heart-pulse"></i>
-            </div>
-
-            <div class="stat-card">
-                <div>
-                    <h3>24/7</h3>
-                    <p>Hệ thống hoạt động</p>
+                <div class="mt-4 glass-card p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span style="font-family:'Sora',sans-serif;font-weight:600;font-size:0.9rem">Tiến độ hôm
+                            nay</span>
+                        <span style="font-size:0.8rem;color:var(--text-secondary)">Cập nhật theo thời gian thực</span>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.06);border-radius:100px;height:10px;overflow:hidden">
+                        <div id="progress-bar"
+                            style="height:100%;background:linear-gradient(90deg,var(--primary),var(--accent2));border-radius:100px;transition:width .6s ease;width:0%;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:0.65rem;font-weight:700;color:#040d1a">
+                        </div>
+                    </div>
                 </div>
-                <i class="fa-solid fa-clock"></i>
             </div>
-
         </section>
+    </div>
 
-        <!-- REPORT -->
-        <section class="report-section">
-
-            <div class="section-header">
-                <h2>Báo cáo sức khỏe hôm nay</h2>
+    <!-- ═══ TAB: SCHEDULE ═══ -->
+    <div id="tab-schedule" class="tab-content-med" style="display:none">
+        <!-- Auth gate -->
+        <div id="schedule-auth-gate" class="auth-gate-section" style="display:none">
+            <div class="auth-gate-card">
+                <div style="font-size:3rem;margin-bottom:16px">🔒</div>
+                <h3 style="font-family:'Sora',sans-serif;font-weight:700;margin-bottom:8px">Yêu cầu đăng nhập</h3>
+                <p style="color:var(--text-secondary);margin-bottom:24px">Vui lòng đăng nhập để xem lịch uống thuốc của
+                    bạn</p>
+                <a href="login.html" class="btn-primary-med">🔑 Đăng nhập ngay</a>
             </div>
-
-            <div class="report-grid">
-
-                <div class="report-card">
-                    <i class="fa-solid fa-temperature-half"></i>
-                    <h3>Thân nhiệt ổn định</h3>
-                    <p>Chỉ số cơ thể hiện tại đang ở trạng thái bình thường.</p>
-                </div>
-
-                <div class="report-card">
-                    <i class="fa-solid fa-heart"></i>
-                    <h3>Nhịp tim ổn định</h3>
-                    <p>Theo dõi nhịp tim theo thời gian thực.</p>
-                </div>
-
-                <div class="report-card">
-                    <i class="fa-solid fa-pills"></i>
-                    <h3>Nhắc uống thuốc</h3>
-                    <p>Hệ thống tự động nhắc đúng giờ uống thuốc.</p>
-                </div>
-
-            </div>
-
-        </section>
-
-        <!-- NEWS -->
-        <div class="news-grid">
-
-            <a class="news-card"
-                href="https://nhathuoclongchau.com.vn/bai-viet/bat-mi-6-thoi-quen-lanh-manh-nang-cao-chat-luong-cuoc-song.html"
-                target="_blank">
-                <img
-                    src="https://cdn.nhathuoclongchau.com.vn/unsafe/800x0/bat_mi_6_thoi_quen_lanh_manh_nang_cao_chat_luong_cuoc_song_1_f5d3cba60e.jpg">
-                <div class="news-content">
-                    <h3>Bật mí 6 thói quen lành mạnh</h3>
-                    <p>Cải thiện sức khỏe và tinh thần mỗi ngày.</p>
-                </div>
-            </a>
-
-            <a class="news-card"
-                href="https://medlatec.vn/tin-tuc/cach-an-uong-khoa-hoc-du-duong-chat-bao-dam-suc-khoe--s51-n30016"
-                target="_blank">
-                <img src="https://login.medlatec.vn//ImagePath/images/20220917/20220917_cach-an-uong-khoa-hoc-1.jpg">
-                <div class="news-content">
-                    <h3>Ăn uống khoa học</h3>
-                    <p>Dinh dưỡng hợp lý giúp cơ thể khỏe mạnh.</p>
-                </div>
-            </a>
-
-            <a class="news-card"
-                href="https://medinet.gov.vn/quan-ly-chat-luong-kham-chua-benh/tim-hieu-nen-tang-cong-nghe-cho-suc-khoe-thong-minh-so-y-te-hcm-c8-11449.aspx"
-                target="_blank">
-                <img src="https://vinuni.edu.vn/wp-content/uploads/2025/11/ung-dung-ai-trong-y-te-1.jpg">
-                <div class="news-content">
-                    <h3>Công nghệ sức khỏe thông minh</h3>
-                    <p>Ứng dụng AI trong y tế hiện đại.</p>
-                </div>
-            </a>
-
         </div>
+        <!-- Schedule content (only for logged in) -->
+        <div id="schedule-content" style="display:none">
+            <section style="position:relative;z-index:1;padding:40px 0 80px">
+                <div class="container">
+                    <div class="row g-4">
+                        <div class="col-lg-8">
+                            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                                <div>
+                                    <h2 class="section-title mb-0">📅 Lịch uống thuốc</h2>
+                                    <p class="section-sub mb-0" id="schedule-patient-label">Theo dõi và đánh dấu thuốc
+                                        đã uống</p>
+                                </div>
+                            </div>
+                            <div class="day-selector mb-4" id="day-selector"></div>
+                            <div class="filter-pills mb-3">
+                                <button class="pill-btn active" data-filter="all">🔘 Tất cả</button>
+                                <button class="pill-btn" data-filter="pending">⏳ Chờ uống</button>
+                                <button class="pill-btn" data-filter="taken">✅ Đã uống</button>
+                                <button class="pill-btn" data-filter="missed">❌ Bỏ lỡ</button>
+                            </div>
+                            <div id="schedule-list">
+                                <div class="spinner-med"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="glass-card p-4 mb-4">
+                                <h5 style="font-family:'Sora',sans-serif;font-weight:700;margin-bottom:16px">🕐 Timeline
+                                    hôm nay</h5>
+                                <div id="timeline-list">
+                                    <div class="spinner-med"></div>
+                                </div>
+                            </div>
+                            <div class="glass-card p-4" style="border-color:rgba(0,212,170,0.2)">
+                                <h6
+                                    style="font-family:'Sora',sans-serif;font-weight:700;margin-bottom:12px;color:var(--primary)">
+                                    💡 Lưu ý quan trọng</h6>
+                                <ul
+                                    style="list-style:none;padding:0;margin:0;font-size:0.84rem;line-height:2;color:var(--text-secondary)">
+                                    <li>💊 Uống đúng liều, đúng giờ</li>
+                                    <li>🍽️ Một số thuốc cần uống sau ăn</li>
+                                    <li>💧 Uống với nhiều nước</li>
+                                    <li>🚫 Không tự ý dừng thuốc</li>
+                                    <li>📞 Liên hệ BS khi có tác dụng phụ</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
 
-    </main>
+    <!-- ═══ TAB: MEDICINES ═══ -->
+    <div id="tab-medicines" class="tab-content-med" style="display:none">
+        <section style="position:relative;z-index:1;padding:40px 0 80px">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2 class="section-title">💊 Thuốc & Sản phẩm y tế</h2>
+                    <p class="section-sub">Tra cứu thông tin chi tiết các loại thuốc và sản phẩm chăm sóc sức khỏe</p>
+                </div>
 
-    <!-- JS -->
-    <script src="js/main.js?v=2" defer></script>
+                <!-- Category filter -->
+                <div class="med-category-bar mb-4">
+                    <button class="med-cat-btn active" data-cat="all">🔘 Tất cả</button>
+                    <button class="med-cat-btn" data-cat="painkiller">💊 Giảm đau / Hạ sốt</button>
+                    <button class="med-cat-btn" data-cat="antibiotic">🧫 Kháng sinh</button>
+                    <button class="med-cat-btn" data-cat="stomach">🫁 Tiêu hóa</button>
+                    <button class="med-cat-btn" data-cat="vitamin">🌿 Vitamin & Bổ sung</button>
+                    <button class="med-cat-btn" data-cat="heart">❤️ Tim mạch</button>
+                    <button class="med-cat-btn" data-cat="device">🩺 Thiết bị y tế</button>
+                </div>
 
+                <!-- Search inside medicines -->
+                <div class="search-wrap mb-4" style="max-width:400px">
+                    <span class="search-icon"><i class="bi bi-search"></i></span>
+                    <input type="text" id="med-search-input" placeholder="Tìm thuốc, sản phẩm..." />
+                </div>
+
+                <div class="row g-4" id="med-catalog-grid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ═══ TAB: NEWS ═══ -->
+    <div id="tab-news" class="tab-content-med" style="display:none">
+        <section style="position:relative;z-index:1;padding:40px 0 80px">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2 class="section-title">📰 Tin tức & Thông tin y tế</h2>
+                    <p class="section-sub">Cập nhật các chủ đề hot và thông tin chuyên ngành y tế mới nhất</p>
+                </div>
+                <!-- Topic pills -->
+                <div class="filter-pills mb-4">
+                    <button class="pill-btn active" data-news-cat="all" onclick="filterNews('all',this)">🔘 Tất
+                        cả</button>
+                    <button class="pill-btn" data-news-cat="drug" onclick="filterNews('drug',this)">💊 Thuốc
+                        mới</button>
+                    <button class="pill-btn" data-news-cat="disease" onclick="filterNews('disease',this)">🦠 Dịch
+                        bệnh</button>
+                    <button class="pill-btn" data-news-cat="health" onclick="filterNews('health',this)">🌿 Sức
+                        khỏe</button>
+                    <button class="pill-btn" data-news-cat="tech" onclick="filterNews('tech',this)">🤖 Y tế công
+                        nghệ</button>
+                    <button class="pill-btn" data-news-cat="policy" onclick="filterNews('policy',this)">📋 Chính
+                        sách</button>
+                </div>
+                <div class="row g-4" id="news-grid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ═══ MED DETAIL MODAL ═══ -->
+    <div class="modal fade modal-med" id="medDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><span id="detail-med-icon">💊</span><span id="detail-med-name"
+                            class="ms-2">Chi tiết thuốc</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="detail-label">Dạng thuốc</div>
+                            <div class="detail-val" id="detail-med-type">–</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-label">Danh mục</div>
+                            <div class="detail-val" id="detail-med-cat">–</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-label">Liều dùng thông thường</div>
+                            <div class="detail-val" id="detail-med-dosage">–</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-label">Tần suất sử dụng</div>
+                            <div class="detail-val" id="detail-med-freq">–</div>
+                        </div>
+                        <div class="col-12">
+                            <div class="detail-label">Công dụng chính</div>
+                            <div style="background:rgba(0,212,170,0.06);border-left:3px solid var(--primary);padding:12px 16px;border-radius:8px;font-size:.88rem;line-height:1.7"
+                                id="detail-med-uses">–</div>
+                        </div>
+                        <div class="col-12">
+                            <div class="detail-label">Tác dụng phụ thường gặp</div>
+                            <div style="background:rgba(255,107,157,0.06);border-left:3px solid var(--accent);padding:12px 16px;border-radius:8px;font-size:.88rem;line-height:1.7"
+                                id="detail-med-side">–</div>
+                        </div>
+                        <div class="col-12">
+                            <div class="detail-label">Lưu ý đặc biệt</div>
+                            <div style="background:rgba(255,193,7,0.06);border-left:3px solid #ffc107;padding:12px 16px;border-radius:8px;font-size:.88rem;line-height:1.7"
+                                id="detail-med-note">–</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-label">Bảo quản</div>
+                            <div class="detail-val" id="detail-med-store">–</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-label">Trạng thái</div>
+                            <span id="detail-med-status"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn-outline-med"
+                        data-bs-dismiss="modal">Đóng</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ FOOTER ═══ -->
+    <footer class="footer-med">
+        <div class="container">
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+                        <div class="brand-icon"
+                            style="width:36px;height:36px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px">
+                            💊</div>
+                        <span
+                            style="font-family:'Sora',sans-serif;font-weight:800;color:var(--primary);font-size:1.2rem">MedReminder</span>
+                    </div>
+                    <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.7">Ứng dụng quản lý lịch uống
+                        thuốc và nhắc nhở bệnh nhân. Đảm bảo tuân thủ điều trị tốt nhất.</p>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="footer-title">Tính năng</div>
+                    <a href="#" class="footer-link" onclick="switchTab('schedule',event)">Lịch hôm nay</a>
+                    <a href="#" class="footer-link" onclick="switchTab('medicines',event)">Danh sách thuốc</a>
+                    <a href="#" class="footer-link" onclick="switchTab('news',event)">Tin tức y tế</a>
+                    <a href="login.html" class="footer-link">Đăng nhập</a>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="footer-title">Quản trị</div>
+                    <a href="admin.html" class="footer-link">Trang Admin</a>
+                    <a href="admin.html" class="footer-link">Quản lý thuốc</a>
+                    <a href="admin.html" class="footer-link">Bệnh nhân</a>
+                </div>
+                <div class="col-md-4">
+                    <div class="footer-title">Thông tin</div>
+                    <p style="font-size:.84rem;color:var(--text-secondary);line-height:1.8">
+                        <strong style="color:var(--text-primary)">Nhóm thực hiện:</strong> Nhóm 7 – FIT4015<br />
+                        <strong style="color:var(--text-primary)">Học phần:</strong> Thiết kế, Lập trình Front-End<br />
+                        <strong style="color:var(--text-primary)">Đề tài:</strong> 09 – MedReminder
+                    </p>
+                </div>
+            </div>
+            <div
+                style="border-top:1px solid var(--border-glass);padding-top:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+                <p style="font-size:.8rem;color:var(--text-muted);margin:0">© 2026 MedReminder. All rights reserved.</p>
+                <a href="admin.html" style="font-size:.8rem;color:var(--primary);text-decoration:none">⚙️ Khu vực quản
+                    lý</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ═══ CHATBOT ═══ -->
+    <button class="chatbot-fab" onclick="toggleChatbot()" aria-label="Bác sĩ ảo">
+        🩺<div class="fab-badge" id="chat-badge">1</div>
+    </button>
+    <div class="chatbot-window" id="chatbot-window">
+        <div class="chatbot-header">
+            <div class="chatbot-avatar">
+                <div class="chatbot-icon">🩺</div>
+                <div>
+                    <div class="chatbot-name">Bác sĩ ảo MedBot</div>
+                    <div class="chatbot-status">🟢 Trực tuyến – Hỗ trợ 24/7</div>
+                </div>
+            </div>
+            <button class="chatbot-close" onclick="toggleChatbot()">✕</button>
+        </div>
+        <div class="chatbot-body" id="chatbot-body">
+            <div class="cb-bubble cb-bot">Xin chào! Tôi là Bác sĩ ảo MedBot 👋<br /><br />Tôi có thể giúp bạn:<br />•
+                Tra cứu lịch uống thuốc<br />• Tư vấn về cách dùng thuốc<br />• Hỏi về tác dụng phụ<br /><br />Bạn cần
+                hỗ trợ gì?</div>
+        </div>
+        <div class="chatbot-quick">
+            <button class="cb-quick-btn" onclick="cbQuick('Lịch uống thuốc hôm nay của tôi?')">📅 Lịch hôm nay</button>
+            <button class="cb-quick-btn" onclick="cbQuick('Paracetamol uống như thế nào?')">💊 Paracetamol</button>
+            <button class="cb-quick-btn" onclick="cbQuick('Uống thuốc trước hay sau ăn?')">🍽️ Cách dùng</button>
+            <button class="cb-quick-btn" onclick="cbQuick('Tác dụng phụ của Amoxicillin là gì?')">⚠️ Tác dụng
+                phụ</button>
+            <button class="cb-quick-btn" onclick="cbQuick('Tôi quên uống thuốc phải làm sao?')">❓ Quên uống</button>
+        </div>
+        <div class="chatbot-input-row">
+            <input class="chatbot-input" id="chatbot-input" placeholder="Nhập câu hỏi..."
+                onkeydown="if(event.key==='Enter')cbSend()" />
+            <button class="chatbot-send" onclick="cbSend()">➤</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/chatbot.js"></script>
 </body>
 
 </html>
