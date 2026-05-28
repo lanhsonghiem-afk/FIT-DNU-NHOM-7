@@ -1,118 +1,133 @@
-const API_patients_URL =
-    "https://69f9a6bcc509a40d3aa2ef52.mockapi.io/api/v1/patients";
+// ============================================================
+//  api.js – Tập trung tất cả hàm gọi MockAPI
+//  MedReminder – Đề tài 09
+// ============================================================
 
-const API_medications_URL =
-    "https://69f9a6bcc509a40d3aa2ef52.mockapi.io/api/v1/medications";
+const API_BASE = {
+    patients: "https://69f9a6bcc509a40d3aa2ef52.mockapi.io/api/v1/patients",
+    medications: "https://69f9a6bcc509a40d3aa2ef52.mockapi.io/api/v1/medications",
+    schedules: "https://6a14718d6c7db8aac05489f6.mockapi.io/api/v1/schedules",
+};
 
-const API_schedules_URL =
-    "https://6a14718d6c7db8aac05489f6.mockapi.io/api/v1/schedules";
-
-// LOAD DATA
-
-async function loadData() {
-
-    try {
-
-        const [patients, meds, schedules]
-            = await Promise.all([
-
-                fetch(API_patients_URL)
-                    .then(res => res.json()),
-
-                fetch(API_medications_URL)
-                    .then(res => res.json()),
-
-                fetch(API_schedules_URL)
-                    .then(res => res.json())
-
-            ]);
-
-        // NẾU CÓ SELECT THÌ RENDER
-
-        if (
-            document.getElementById("patientSelect")
-        ) {
-
-            renderSelect(
-                "patientSelect",
-                patients
-            );
-        }
-
-        if (
-            document.getElementById("medSelect")
-        ) {
-
-            renderSelect(
-                "medSelect",
-                meds
-            );
-        }
-
-        // RENDER LỊCH
-
-        renderSchedules(
-            schedules,
-            patients,
-            meds
-        );
-
-    } catch (error) {
-
-        console.log(error);
-
-        alert("Không thể tải dữ liệu!");
-    }
+// ─── Helper ──────────────────────────────────────────────────
+async function request(url, options = {}) {
+    const res = await fetch(url, {
+        headers: { "Content-Type": "application/json" },
+        ...options,
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    // DELETE trả về 200 với body rỗng ở một số mock
+    const text = await res.text();
+    return text ? JSON.parse(text) : {};
 }
 
-// RENDER SELECT
-
-function renderSelect(id, data) {
-
-    const select =
-        document.getElementById(id);
-
-    if (!select) return;
-
-    select.innerHTML = data.map(item => `
-
-        <option value="${item.id}">
-            ${item.name}
-        </option>
-
-    `).join("");
+// ─── PATIENTS ────────────────────────────────────────────────
+async function getPatients() {
+    return request(API_BASE.patients);
 }
 
-// XÓA LỊCH
+async function getPatient(id) {
+    return request(`${API_BASE.patients}/${id}`);
+}
+
+async function createPatient(data) {
+    return request(API_BASE.patients, {
+        method: "POST",
+        body: JSON.stringify(data),
+    });
+}
+
+async function updatePatient(id, data) {
+    return request(`${API_BASE.patients}/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+    });
+}
+
+async function deletePatient(id) {
+    return request(`${API_BASE.patients}/${id}`, { method: "DELETE" });
+}
+
+// ─── MEDICATIONS ─────────────────────────────────────────────
+async function getMedications() {
+    return request(API_BASE.medications);
+}
+
+async function getMedication(id) {
+    return request(`${API_BASE.medications}/${id}`);
+}
+
+async function createMedication(data) {
+    return request(API_BASE.medications, {
+        method: "POST",
+        body: JSON.stringify(data),
+    });
+}
+
+async function updateMedication(id, data) {
+    return request(`${API_BASE.medications}/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+    });
+}
+
+async function deleteMedication(id) {
+    return request(`${API_BASE.medications}/${id}`, { method: "DELETE" });
+}
+
+// ─── SCHEDULES ───────────────────────────────────────────────
+async function getSchedules() {
+    return request(API_BASE.schedules);
+}
+
+async function getSchedule(id) {
+    return request(`${API_BASE.schedules}/${id}`);
+}
+
+async function createSchedule(data) {
+    return request(API_BASE.schedules, {
+        method: "POST",
+        body: JSON.stringify(data),
+    });
+}
+
+async function updateSchedule(id, data) {
+    return request(`${API_BASE.schedules}/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+    });
+}
 
 async function deleteSchedule(id) {
-
-    try {
-
-        await fetch(
-
-            `${API_schedules_URL}/${id}`,
-
-            {
-                method: "DELETE"
-            }
-
-        );
-
-        await loadData();
-
-    } catch (error) {
-
-        console.log(error);
-
-        alert("Xóa thất bại!");
-    }
+    return request(`${API_BASE.schedules}/${id}`, { method: "DELETE" });
 }
 
-// EXPORT GLOBAL
+// ─── Toggle trạng thái đã uống (⭐ điểm kỹ thuật nổi bật) ───
+async function toggleTakenStatus(scheduleId, currentStatus) {
+    const newStatus = currentStatus === "taken" ? "pending" : "taken";
+    const payload = {
+        status: newStatus,
+        takenAt: newStatus === "taken" ? new Date().toISOString() : null,
+    };
+    return updateSchedule(scheduleId, payload);
+}
 
-window.loadData = loadData;
+// ─── Export global ───────────────────────────────────────────
+window.getPatients = getPatients;
+window.getPatient = getPatient;
+window.createPatient = createPatient;
+window.updatePatient = updatePatient;
+window.deletePatient = deletePatient;
 
-window.renderSelect = renderSelect;
+window.getMedications = getMedications;
+window.getMedication = getMedication;
+window.createMedication = createMedication;
+window.updateMedication = updateMedication;
+window.deleteMedication = deleteMedication;
 
+window.getSchedules = getSchedules;
+window.getSchedule = getSchedule;
+window.createSchedule = createSchedule;
+window.updateSchedule = updateSchedule;
 window.deleteSchedule = deleteSchedule;
+window.toggleTakenStatus = toggleTakenStatus;
