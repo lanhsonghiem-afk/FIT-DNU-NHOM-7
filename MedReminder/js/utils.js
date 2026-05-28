@@ -1,181 +1,139 @@
-// ===== utils.js - Utilities =====
+// ============================================================
+//  utils.js – Hàm tiện ích dùng chung
+//  MedReminder – Đề tài 09
+// ============================================================
 
-const Utils = (() => {
-    // ── TOAST NOTIFICATIONS ──
-    let toastContainer = null;
+// ─── Ngày / giờ ──────────────────────────────────────────────
+function getTodayString() {
+    return new Date().toISOString().split("T")[0];
+}
 
-    function ensureToastContainer() {
-        if (!toastContainer) {
-            toastContainer = document.createElement('div');
-            toastContainer.className = 'toast-container';
-            document.body.appendChild(toastContainer);
-        }
-        return toastContainer;
-    }
+function formatTime(timeStr) {
+    if (!timeStr) return "—";
+    return timeStr.length === 5 ? timeStr : timeStr.substring(0, 5);
+}
 
-    function showToast(message, type = 'primary', subtitle = '') {
-        const container = ensureToastContainer();
-        const icons = { primary: '💊', success: '✅', danger: '❌', warning: '⚠️' };
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        toast.innerHTML = `
-      <span class="toast-icon">${icons[type] || '💊'}</span>
-      <div>
-        <div class="toast-msg">${message}</div>
-        ${subtitle ? `<div class="toast-sub">${subtitle}</div>` : ''}
-      </div>
-    `;
-        container.appendChild(toast);
-        setTimeout(() => {
-            toast.classList.add('hide');
-            setTimeout(() => toast.remove(), 350);
-        }, 3200);
-    }
+function formatDate(dateStr) {
+    if (!dateStr) return "—";
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("vi-VN");
+}
 
-    // ── MODAL ──
-    function openModal(id) {
-        const overlay = document.getElementById(id);
-        if (overlay) overlay.classList.add('open');
-    }
+function formatDateTime(iso) {
+    if (!iso) return "—";
+    const d = new Date(iso);
+    return d.toLocaleString("vi-VN");
+}
 
-    function closeModal(id) {
-        const overlay = document.getElementById(id);
-        if (overlay) overlay.classList.remove('open');
-    }
+// ─── Icon theo loại thuốc ─────────────────────────────────────
+function getMedIcon(type = "") {
+    const t = type.toLowerCase();
+    if (t.includes("viên nang")) return "💊";
+    if (t.includes("viên nén")) return "⬛";
+    if (t.includes("siro") || t.includes("dung dịch")) return "🧴";
+    if (t.includes("ống tiêm") || t.includes("tiêm")) return "💉";
+    if (t.includes("nhỏ mắt")) return "👁️";
+    if (t.includes("kem") || t.includes("gel")) return "🧪";
+    return "💊";
+}
 
-    function closeAllModals() {
-        document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
-    }
+// ─── Badge trạng thái ─────────────────────────────────────────
+function getStatusBadge(status) {
+    const map = {
+        taken: { cls: "badge-taken", label: "Đã uống" },
+        pending: { cls: "badge-pending", label: "Chờ uống" },
+        missed: { cls: "badge-missed", label: "Bỏ lỡ" },
+        active: { cls: "badge-active", label: "Đang dùng" },
+        inactive: { cls: "badge-missed", label: "Ngừng" },
+    };
+    const s = map[status] || { cls: "badge-pending", label: status };
+    return `<span class="badge-status ${s.cls}">${s.label}</span>`;
+}
 
-    // Click outside modal to close
-    document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal-overlay')) {
-            e.target.classList.remove('open');
-        }
+// ─── Loading skeleton ─────────────────────────────────────────
+function showLoading(containerId, rows = 3) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    el.innerHTML = Array(rows).fill(0).map(() => `
+        <div class="skeleton-block mb-3" style="height:80px;border-radius:12px"></div>
+    `).join("");
+}
+
+// ─── Toast thông báo ─────────────────────────────────────────
+function showToast(message, type = "info") {
+    const toastEl = document.getElementById("liveToast");
+    const toastBody = document.getElementById("toast-body");
+    if (!toastEl || !toastBody) return;
+
+    toastEl.className = `toast toast-med toast-${type}`;
+    toastBody.textContent = message;
+
+    const toast = bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 3000 });
+    toast.show();
+}
+
+// ─── Debounce ─────────────────────────────────────────────────
+function debounce(fn, delay = 300) {
+    let timer;
+    return function (...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), delay);
+    };
+}
+
+// ─── Validate form ────────────────────────────────────────────
+/**
+ * rules: [{ field: 'name', check: (v) => v.trim() !== '', msg: 'Không được để trống' }]
+ * Trả về true nếu hợp lệ
+ */
+function validateForm(formId, rules) {
+    let valid = true;
+    // Reset
+    document.querySelectorAll(`#${formId} .form-control-med`).forEach(el => {
+        el.classList.remove("is-invalid");
+    });
+    document.querySelectorAll(`#${formId} .invalid-feedback-med`).forEach(el => {
+        el.style.display = "none";
     });
 
-    // ── FORMAT HELPERS ──
-    function formatDate(dateStr) {
-        if (!dateStr) return '—';
-        const d = new Date(dateStr);
-        return d.toLocaleDateString('vi-VN');
-    }
-
-    function formatDateTime() {
-        return new Date().toLocaleString('vi-VN');
-    }
-
-    function getToday() {
-        const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-        const months = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
-            'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
-        const now = new Date();
-        return {
-            dayName: days[now.getDay()],
-            date: now.getDate(),
-            month: months[now.getMonth()],
-            year: now.getFullYear(),
-            full: `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`,
-            time: now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
-        };
-    }
-
-    function isExpiringSoon(dateStr, days = 30) {
-        const d = new Date(dateStr);
-        const now = new Date();
-        const diff = (d - now) / (1000 * 60 * 60 * 24);
-        return diff <= days && diff >= 0;
-    }
-
-    function isExpired(dateStr) {
-        return new Date(dateStr) < new Date();
-    }
-
-    // ── TABS ──
-    function initTabs(containerSelector) {
-        const containers = document.querySelectorAll(containerSelector);
-        containers.forEach(container => {
-            const buttons = container.querySelectorAll('.tab-btn');
-            const contents = container.querySelectorAll('.tab-content');
-            buttons.forEach((btn, i) => {
-                btn.addEventListener('click', () => {
-                    buttons.forEach(b => b.classList.remove('active'));
-                    contents.forEach(c => c.classList.remove('active'));
-                    btn.classList.add('active');
-                    if (contents[i]) contents[i].classList.add('active');
-                });
-            });
-        });
-    }
-
-    // ── TOGGLE ──
-    function initToggles() {
-        document.querySelectorAll('.toggle').forEach(toggle => {
-            toggle.addEventListener('click', () => toggle.classList.toggle('on'));
-        });
-    }
-
-    // ── SEARCH / FILTER TABLE ──
-    function filterTable(inputEl, tableBodyEl) {
-        const q = inputEl.value.toLowerCase();
-        const rows = tableBodyEl.querySelectorAll('tr');
-        rows.forEach(row => {
-            row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
-        });
-    }
-
-    // ── CONFIRM DIALOG (simple) ──
-    function confirm(message, onConfirm) {
-        if (window.confirm(message)) onConfirm();
-    }
-
-    // ── DEBOUNCE ──
-    function debounce(fn, ms = 300) {
-        let t;
-        return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
-    }
-
-    // ── ANIMATE NUMBER ──
-    function animateNumber(el, target, duration = 800) {
-        const start = 0;
-        const step = target / (duration / 16);
-        let current = start;
-        const timer = setInterval(() => {
-            current = Math.min(current + step, target);
-            el.textContent = Math.floor(current);
-            if (current >= target) clearInterval(timer);
-        }, 16);
-    }
-
-    // ── PROGRESS RING SVG ──
-    function renderProgressRing(containerId, percent) {
-        const el = document.getElementById(containerId);
+    rules.forEach(({ fieldId, check, msg }) => {
+        const el = document.getElementById(fieldId);
         if (!el) return;
-        const radius = 52;
-        const circumference = 2 * Math.PI * radius;
-        const offset = circumference - (percent / 100) * circumference;
-        el.innerHTML = `
-      <div class="progress-ring-container">
-        <svg width="130" height="130" viewBox="0 0 130 130">
-          <circle class="progress-ring-bg" cx="65" cy="65" r="${radius}"/>
-          <circle class="progress-ring-fill" cx="65" cy="65" r="${radius}"
-            stroke-dasharray="${circumference}"
-            stroke-dashoffset="${offset}"/>
-        </svg>
-        <div class="progress-ring-text">
-          <span class="progress-ring-percent">${percent}%</span>
-          <span class="progress-ring-label">Tuân thủ</span>
-        </div>
-      </div>
-    `;
-    }
+        const val = el.value;
+        if (!check(val)) {
+            el.classList.add("is-invalid");
+            const errEl = el.nextElementSibling;
+            if (errEl && errEl.classList.contains("invalid-feedback-med")) {
+                errEl.textContent = msg;
+                errEl.style.display = "block";
+            }
+            valid = false;
+        }
+    });
+    return valid;
+}
 
-    return {
-        showToast, openModal, closeModal, closeAllModals,
-        formatDate, formatDateTime, getToday, isExpiringSoon, isExpired,
-        initTabs, initToggles, filterTable, confirm, debounce,
-        animateNumber, renderProgressRing,
-    };
-})();
+// ─── Reset form ───────────────────────────────────────────────
+function resetForm(formId) {
+    const form = document.getElementById(formId);
+    if (form) form.reset();
+    document.querySelectorAll(`#${formId} .form-control-med`).forEach(el => {
+        el.classList.remove("is-invalid", "is-valid");
+    });
+    document.querySelectorAll(`#${formId} .invalid-feedback-med`).forEach(el => {
+        el.style.display = "none";
+    });
+}
 
-window.Utils = Utils;
+// ─── Export global ───────────────────────────────────────────
+window.getTodayString = getTodayString;
+window.formatTime = formatTime;
+window.formatDate = formatDate;
+window.formatDateTime = formatDateTime;
+window.getMedIcon = getMedIcon;
+window.getStatusBadge = getStatusBadge;
+window.showLoading = showLoading;
+window.showToast = showToast;
+window.debounce = debounce;
+window.validateForm = validateForm;
+window.resetForm = resetForm;
