@@ -10,221 +10,235 @@
     <link rel="stylesheet" href="css/styleadmin.css" />
     <style>
         .content-section {
-            display: none
+            display: none;
         }
 
         .content-section.active {
-            display: block
-        }
-
-        .a-stat {
-            cursor: default
-        }
-
-        .history-filter {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 16px
-        }
-
-        .history-filter select,
-        .history-filter input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border-glass);
-            border-radius: 9px;
-            color: var(--text-primary);
-            padding: 7px 12px;
-            font-size: 0.84rem;
-            outline: none
-        }
-
-        .history-filter select option {
-            background: #0d1b2a
+            display: block;
         }
 
         .patient-card {
             background: var(--bg-glass);
             border: 1px solid var(--border-glass);
-            border-radius: 14px;
-            padding: 18px;
-            transition: .25s
+            border-radius: 16px;
+            padding: 20px;
+            transition: .25s;
         }
 
         .patient-card:hover {
             border-color: var(--border-primary);
-            transform: translateY(-2px)
         }
 
         .patient-avatar {
             width: 48px;
             height: 48px;
+            background: linear-gradient(135deg, var(--accent2), var(--primary));
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--accent2));
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 22px;
-            flex-shrink: 0
+            flex-shrink: 0;
         }
 
         .note-box {
-            background: rgba(0, 212, 170, 0.06);
-            border-left: 3px solid var(--primary);
-            padding: 10px 14px;
-            border-radius: 0 8px 8px 0;
-            font-size: .82rem;
-            color: var(--text-secondary);
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid var(--border-glass);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: .8rem;
+            color: var(--text-muted);
             margin-top: 10px;
-            line-height: 1.6
         }
 
-        .tab-indicator {
-            height: 2px;
-            background: var(--primary);
-            border-radius: 1px;
-            transition: all .3s
+        .nav-section-sep {
+            height: 1px;
+            background: var(--border-glass);
+            margin: 8px 12px;
+        }
+
+        .section-tag {
+            font-size: .6rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            padding: 8px 20px 3px;
+        }
+
+        /* Catalog img preview */
+        #catalog-img-preview {
+            width: 100%;
+            max-height: 160px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-top: 8px;
+            border: 1px solid var(--border-glass);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0)
+            }
         }
     </style>
 </head>
 
 <body>
-
-    <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
-    <div id="toast-container" class="position-fixed top-0 end-0 p-3" style="z-index:9999"></div>
+    <!-- Toast container -->
+    <div id="toast-container"
+        style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;align-items:flex-end">
+    </div>
 
     <!-- ═══ SIDEBAR ═══ -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
     <aside class="admin-sidebar" id="admin-sidebar">
         <div class="sidebar-logo">
             <div class="logo-icon">💊</div>
             <span>MedReminder</span>
         </div>
         <nav class="sidebar-nav">
+            <!-- TỔNG QUAN -->
             <div class="nav-section-title">Tổng quan</div>
-            <a class="nav-item active" data-section="dashboard" onclick="showSection('dashboard',this)">
-                <span class="nav-icon">📊</span> Tổng quan
-            </a>
-            <div class="nav-section-title" style="margin-top:8px">Quản lý</div>
-            <a class="nav-item" data-section="medications" onclick="showSection('medications',this)">
-                <span class="nav-icon">💊</span> Quản lý thuốc
-            </a>
-            <a class="nav-item" data-section="patients" onclick="showSection('patients',this)">
+            <div class="nav-item active" data-section="dashboard" onclick="showSection('dashboard',this)">
+                <span class="nav-icon">📊</span> Dashboard
+            </div>
+
+            <!-- QUẢN LÝ LỊCH UỐNG THUỐC -->
+            <div class="nav-section-sep"></div>
+            <div class="nav-section-title">Lịch uống thuốc</div>
+            <div class="nav-item" data-section="medications" onclick="showSection('medications',this)">
+                <span class="nav-icon">💉</span> Thuốc (Danh mục lịch)
+            </div>
+            <div class="nav-item" data-section="patients" onclick="showSection('patients',this)">
                 <span class="nav-icon">👥</span> Bệnh nhân
-            </a>
-            <a class="nav-item" data-section="schedules" onclick="showSection('schedules',this)">
+            </div>
+            <div class="nav-item" data-section="schedules" onclick="showSection('schedules',this)">
                 <span class="nav-icon">📅</span> Lịch uống thuốc
-            </a>
-            <a class="nav-item" data-section="history" onclick="showSection('history',this)">
+            </div>
+            <div class="nav-item" data-section="history" onclick="showSection('history',this)">
                 <span class="nav-icon">📋</span> Lịch sử uống thuốc
-            </a>
-            <div class="nav-section-title" style="margin-top:8px">Khác</div>
-            <a class="nav-item" href="index.html">
-                <span class="nav-icon">🏠</span> Trang công khai
-            </a>
-            <a class="nav-item" onclick="logoutAdmin()" style="cursor:pointer">
-                <span class="nav-icon">🚪</span> Đăng xuất
-            </a>
+            </div>
+
+            <!-- QUẢN LÝ TRANG CHỦ -->
+            <div class="nav-section-sep"></div>
+            <div class="nav-section-title">Nội dung trang chủ</div>
+            <div class="nav-item" data-section="catalog" onclick="showSection('catalog',this)">
+                <span class="nav-icon">🏪</span> Thuốc & Sản phẩm
+            </div>
+            <div class="nav-item" data-section="news" onclick="showSection('news',this)">
+                <span class="nav-icon">📰</span> Tin tức y tế
+            </div>
         </nav>
         <div class="sidebar-footer">
-            <div style="font-weight:600;color:var(--text-secondary);margin-bottom:2px;font-size:.82rem">Nhóm 7 – FIT4015
+            <div id="admin-username" style="font-weight:600;color:var(--primary);margin-bottom:4px">–</div>
+            <div style="font-size:.75rem">Quản trị viên</div>
+            <div style="margin-top:10px;display:flex;gap:8px">
+                <a href="index.html" style="font-size:.78rem;color:var(--text-secondary);text-decoration:none">🏠 Trang
+                    chủ</a>
+                <span style="color:var(--text-muted)">·</span>
+                <span class="cursor-pointer" style="font-size:.78rem;color:var(--accent);cursor:pointer"
+                    onclick="logoutAdmin()">🚪 Đăng xuất</span>
             </div>
-            <div style="color:var(--text-muted)">MedReminder v2.0</div>
         </div>
     </aside>
 
     <!-- ═══ MAIN ═══ -->
     <main class="admin-main">
+        <!-- Topbar -->
         <div class="admin-topbar">
             <div class="d-flex align-items-center gap-3">
-                <button id="sidebar-toggle" onclick="toggleSidebar()"
-                    style="background:none;border:none;color:var(--text-primary);font-size:1.3rem;cursor:pointer"
-                    class="d-lg-none">☰</button>
-                <span id="topbar-title" class="topbar-title">Tổng quan</span>
+                <button class="d-lg-none" style="background:none;border:none;color:var(--text-primary);font-size:1.3rem"
+                    onclick="toggleSidebar()">☰</button>
+                <span class="topbar-title" id="topbar-title">📊 Tổng quan</span>
             </div>
             <div class="topbar-right">
-                <span style="font-size:.82rem;color:var(--text-secondary)">👋 Xin chào, <strong id="admin-username"
-                        style="color:var(--primary)">Admin</strong></span>
-                <div
-                    style="width:34px;height:34px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px">
-                    👑</div>
-                <button id="btn-logout" onclick="logoutAdmin()"
-                    style="background:rgba(255,107,157,0.12);border:1px solid rgba(255,107,157,0.25);color:var(--accent);padding:6px 14px;border-radius:8px;font-size:.78rem;font-weight:600;cursor:pointer">🚪
-                    Đăng xuất</button>
+                <a href="index.html" class="btn-a-secondary"
+                    style="padding:7px 14px;text-decoration:none;font-size:.8rem">🏠 Trang chủ</a>
+                <button class="btn-a-danger" style="padding:7px 14px" onclick="logoutAdmin()">🚪 Đăng xuất</button>
             </div>
         </div>
 
         <div class="admin-content">
 
-            <!-- ─── DASHBOARD ─── -->
-            <div id="section-dashboard" class="content-section active">
+            <!-- ════ DASHBOARD ════ -->
+            <section id="section-dashboard" class="content-section active">
                 <div class="row g-3 mb-4">
-                    <div class="col-6 col-md-4 col-xl-2">
+                    <div class="col-6 col-md-3 col-xl-2">
                         <div class="a-stat">
-                            <div class="icon">💊</div>
-                            <div class="value" id="dash-meds">—</div>
-                            <div class="label">Loại thuốc</div>
+                            <div class="icon">💉</div>
+                            <div class="value" id="dash-meds">–</div>
+                            <div class="label">Thuốc (lịch)</div>
                         </div>
                     </div>
-                    <div class="col-6 col-md-4 col-xl-2">
+                    <div class="col-6 col-md-3 col-xl-2">
                         <div class="a-stat">
                             <div class="icon">👥</div>
-                            <div class="value" id="dash-patients">—</div>
+                            <div class="value" id="dash-patients">–</div>
                             <div class="label">Bệnh nhân</div>
                         </div>
                     </div>
-                    <div class="col-6 col-md-4 col-xl-2">
+                    <div class="col-6 col-md-3 col-xl-2">
                         <div class="a-stat">
                             <div class="icon">📅</div>
-                            <div class="value" id="dash-schedules">—</div>
-                            <div class="label">Tổng lịch</div>
+                            <div class="value" id="dash-schedules">–</div>
+                            <div class="label">Lịch hôm nay</div>
                         </div>
                     </div>
-                    <div class="col-6 col-md-4 col-xl-2">
+                    <div class="col-6 col-md-3 col-xl-2">
                         <div class="a-stat">
                             <div class="icon">✅</div>
-                            <div class="value" id="dash-taken" style="color:#4caf50">—</div>
+                            <div class="value" id="dash-taken" style="color:#4caf50">–</div>
                             <div class="label">Đã uống</div>
                         </div>
                     </div>
-                    <div class="col-6 col-md-4 col-xl-2">
+                    <div class="col-6 col-md-3 col-xl-2">
                         <div class="a-stat">
-                            <div class="icon">⏳</div>
-                            <div class="value" id="dash-pending" style="color:#ffc107">—</div>
-                            <div class="label">Chờ uống</div>
+                            <div class="icon">🏪</div>
+                            <div class="value" id="dash-catalog-count" style="color:var(--accent2)">–</div>
+                            <div class="label">Sản phẩm</div>
                         </div>
                     </div>
-                    <div class="col-6 col-md-4 col-xl-2">
+                    <div class="col-6 col-md-3 col-xl-2">
                         <div class="a-stat">
-                            <div class="icon">❌</div>
-                            <div class="value" id="dash-missed" style="color:var(--accent)">—</div>
-                            <div class="label">Bỏ lỡ</div>
+                            <div class="icon">📰</div>
+                            <div class="value" id="dash-news-count" style="color:var(--accent)">–</div>
+                            <div class="label">Tin tức</div>
                         </div>
                     </div>
                 </div>
-                <!-- Progress -->
-                <div class="a-card mb-4 p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span style="font-family:'Sora',sans-serif;font-weight:700;font-size:.9rem">📈 Tỉ lệ tuân thủ
-                            hôm nay</span>
-                        <span
-                            style="font-family:'Sora',sans-serif;font-size:1.2rem;font-weight:800;color:var(--primary)"
-                            id="dash-pct">—</span>
+                <div class="a-card mb-4">
+                    <div class="a-card-header">
+                        <h6>Tiến độ uống thuốc hôm nay</h6><span id="dash-pct"
+                            style="color:var(--primary);font-weight:700">–</span>
                     </div>
-                    <div style="background:rgba(255,255,255,0.06);border-radius:100px;height:10px;overflow:hidden">
-                        <div id="dash-progress"
-                            style="height:100%;background:linear-gradient(90deg,var(--primary),var(--accent2));border-radius:100px;transition:width .6s;width:0%">
+                    <div class="a-card-body" style="padding:16px 20px">
+                        <div style="background:rgba(255,255,255,.06);border-radius:100px;height:12px;overflow:hidden">
+                            <div id="dash-progress"
+                                style="height:100%;background:linear-gradient(90deg,var(--primary),var(--accent2));border-radius:100px;transition:width .6s ease;width:0%">
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:16px;margin-top:12px;font-size:.82rem;flex-wrap:wrap">
+                            <span>✅ Đã uống: <strong id="dash-taken-dup" style="color:#4caf50">–</strong></span>
+                            <span>⏳ Chờ: <strong id="dash-pending" style="color:#ffc107">–</strong></span>
+                            <span>❌ Bỏ lỡ: <strong id="dash-missed" style="color:var(--accent)">–</strong></span>
                         </div>
                     </div>
                 </div>
-                <!-- Today's schedule table -->
                 <div class="a-card">
                     <div class="a-card-header">
-                        <h6>📋 Lịch uống thuốc hôm nay</h6>
+                        <h6>📅 Lịch hôm nay</h6>
                         <button class="btn-a-primary"
-                            onclick="showSection('schedules',document.querySelector('[data-section=schedules]'))">Xem
-                            tất cả</button>
+                            onclick="showSection('schedules',document.querySelector('[data-section=schedules]'))">Quản
+                            lý lịch</button>
                     </div>
-                    <div class="a-card-body p-0" style="overflow-x:auto">
+                    <div style="overflow-x:auto">
                         <table class="a-table">
                             <thead>
                                 <tr>
@@ -236,30 +250,28 @@
                                     <th>Trạng thái</th>
                                 </tr>
                             </thead>
-                            <tbody id="dash-sched-body">
-                                <tr>
-                                    <td colspan="6" class="text-center py-4" style="color:var(--text-muted)">Đang tải...
-                                    </td>
-                                </tr>
-                            </tbody>
+                            <tbody id="dash-sched-body"></tbody>
                         </table>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- ─── MEDICATIONS ─── -->
-            <div id="section-medications" class="content-section">
-                <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+            <!-- ════ MEDICATIONS (for schedule) ════ -->
+            <section id="section-medications" class="content-section">
+                <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
                     <div>
-                        <h4 style="font-family:'Sora',sans-serif;font-weight:700;margin-bottom:4px">💊 Quản lý thuốc
-                        </h4>
-                        <p style="color:var(--text-muted);font-size:.85rem;margin:0">Thêm, sửa, xóa thông tin thuốc</p>
+                        <h4 style="font-family:'Sora',sans-serif;font-weight:700;margin:0">💉 Quản lý thuốc (dùng cho
+                            lịch uống)</h4>
+                        <p style="font-size:.82rem;color:var(--text-muted);margin:4px 0 0">Danh mục thuốc được dùng để
+                            tạo lịch uống cho bệnh nhân. Tách biệt với thuốc hiển thị ở trang chủ.</p>
                     </div>
-                    <div class="d-flex gap-2 align-items-center flex-wrap">
-                        <input type="text" id="search-meds" placeholder="🔍 Tìm thuốc..."
-                            style="background:rgba(255,255,255,0.05);border:1px solid var(--border-glass);border-radius:9px;color:var(--text-primary);padding:8px 14px;font-size:.86rem;outline:none;width:200px"
+                    <button class="btn-a-primary" onclick="openAddMed()">➕ Thêm thuốc</button>
+                </div>
+                <div class="a-card mb-3">
+                    <div class="a-card-body" style="padding:14px 20px">
+                        <input type="text" placeholder="🔍 Tìm theo tên thuốc, danh mục..." class="form-control"
+                            style="background:var(--bg-glass-strong);border:1px solid var(--border-glass);color:var(--text-primary);border-radius:9px"
                             oninput="renderMedTable(this.value)" />
-                        <button class="btn-a-primary" onclick="openAddMed()">+ Thêm thuốc</button>
                     </div>
                 </div>
                 <div class="a-card">
@@ -267,7 +279,7 @@
                         <table class="a-table">
                             <thead>
                                 <tr>
-                                    <th>Thuốc</th>
+                                    <th>Tên thuốc</th>
                                     <th>Danh mục</th>
                                     <th>Liều dùng</th>
                                     <th>Tần suất</th>
@@ -277,55 +289,59 @@
                                     <th>Thao tác</th>
                                 </tr>
                             </thead>
-                            <tbody id="med-tbody">
-                                <tr>
-                                    <td colspan="8" class="text-center py-4">
-                                        <div class="spinner-border spinner-border-sm" style="color:var(--primary)">
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
+                            <tbody id="med-tbody"></tbody>
                         </table>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- ─── PATIENTS ─── -->
-            <div id="section-patients" class="content-section">
-                <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
-                    <div>
-                        <h4 style="font-family:'Sora',sans-serif;font-weight:700;margin-bottom:4px">👥 Danh sách bệnh
-                            nhân</h4>
-                        <p style="color:var(--text-muted);font-size:.85rem;margin:0">Quản lý thông tin bệnh nhân</p>
-                    </div>
-                    <div class="d-flex gap-2 align-items-center flex-wrap">
-                        <input type="text" id="search-patients" placeholder="🔍 Tìm bệnh nhân..."
-                            style="background:rgba(255,255,255,0.05);border:1px solid var(--border-glass);border-radius:9px;color:var(--text-primary);padding:8px 14px;font-size:.86rem;outline:none;width:200px"
+            <!-- ════ PATIENTS ════ -->
+            <section id="section-patients" class="content-section">
+                <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+                    <h4 style="font-family:'Sora',sans-serif;font-weight:700;margin:0">👥 Quản lý bệnh nhân</h4>
+                    <button class="btn-a-primary" onclick="openAddPatient()">➕ Thêm bệnh nhân</button>
+                </div>
+                <div class="a-card mb-3">
+                    <div class="a-card-body" style="padding:14px 20px">
+                        <input type="text" placeholder="🔍 Tìm theo tên bệnh nhân..." class="form-control"
+                            style="background:var(--bg-glass-strong);border:1px solid var(--border-glass);color:var(--text-primary);border-radius:9px"
                             oninput="renderPatientCards(this.value)" />
-                        <button class="btn-a-primary" onclick="openAddPatient()">+ Thêm bệnh nhân</button>
                     </div>
                 </div>
                 <div class="row g-3" id="patient-grid"></div>
-            </div>
+            </section>
 
-            <!-- ─── SCHEDULES ─── -->
-            <div id="section-schedules" class="content-section">
-                <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+            <!-- ════ SCHEDULES ════ -->
+            <section id="section-schedules" class="content-section">
+                <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
                     <div>
-                        <h4 style="font-family:'Sora',sans-serif;font-weight:700;margin-bottom:4px">📅 Lịch uống thuốc
-                        </h4>
-                        <p style="color:var(--text-muted);font-size:.85rem;margin:0">Thêm và quản lý lịch uống thuốc</p>
+                        <h4 style="font-family:'Sora',sans-serif;font-weight:700;margin:0">📅 Lịch uống thuốc</h4>
+                        <p style="font-size:.82rem;color:var(--text-muted);margin:4px 0 0">Tạo và quản lý lịch uống
+                            thuốc cho từng bệnh nhân</p>
                     </div>
-                    <div class="d-flex gap-2 align-items-center flex-wrap">
-                        <input type="date" id="filter-sched-date"
-                            style="background:rgba(255,255,255,0.05);border:1px solid var(--border-glass);border-radius:9px;color:var(--text-primary);padding:7px 12px;font-size:.84rem;outline:none"
-                            oninput="renderScheduleTable()" />
-                        <select id="filter-sched-patient"
-                            style="background:rgba(4,13,26,0.97);border:1px solid var(--border-glass);border-radius:9px;color:var(--text-primary);padding:7px 12px;font-size:.84rem;outline:none"
-                            onchange="renderScheduleTable()">
-                            <option value="">Tất cả bệnh nhân</option>
-                        </select>
-                        <button class="btn-a-primary" onclick="openAddSchedule()">+ Thêm lịch</button>
+                    <button class="btn-a-primary" onclick="openAddSchedule()">➕ Thêm lịch</button>
+                </div>
+                <div class="a-card mb-3">
+                    <div class="a-card-body" style="padding:14px 20px">
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <input type="date" id="filter-sched-date" class="form-control"
+                                    style="background:var(--bg-glass-strong);border:1px solid var(--border-glass);color:var(--text-primary);border-radius:9px"
+                                    onchange="renderScheduleTable()" />
+                            </div>
+                            <div class="col-md-4">
+                                <select id="filter-sched-patient" class="form-select"
+                                    style="background:var(--bg-glass-strong);border:1px solid var(--border-glass);color:var(--text-primary);border-radius:9px"
+                                    onchange="renderScheduleTable()">
+                                    <option value="">Tất cả bệnh nhân</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn-a-secondary w-100"
+                                    onclick="document.getElementById('filter-sched-date').value='';document.getElementById('filter-sched-patient').value='';renderScheduleTable()">🔄
+                                    Reset bộ lọc</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="a-card">
@@ -337,46 +353,57 @@
                                     <th>Bệnh nhân</th>
                                     <th>Ngày</th>
                                     <th>Giờ</th>
-                                    <th>Liều</th>
+                                    <th>Liều dùng</th>
                                     <th>Ghi chú</th>
                                     <th>Trạng thái</th>
                                     <th>Thao tác</th>
                                 </tr>
                             </thead>
-                            <tbody id="sched-tbody">
-                                <tr>
-                                    <td colspan="8" class="text-center py-4">
-                                        <div class="spinner-border spinner-border-sm" style="color:var(--primary)">
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
+                            <tbody id="sched-tbody"></tbody>
                         </table>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- ─── HISTORY ─── -->
-            <div id="section-history" class="content-section">
-                <div class="mb-4">
-                    <h4 style="font-family:'Sora',sans-serif;font-weight:700;margin-bottom:4px">📋 Lịch sử uống thuốc
-                    </h4>
-                    <p style="color:var(--text-muted);font-size:.85rem;margin:0">Toàn bộ lịch sử theo dõi từng bệnh nhân
-                    </p>
+            <!-- ════ HISTORY ════ -->
+            <section id="section-history" class="content-section">
+                <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+                    <h4 style="font-family:'Sora',sans-serif;font-weight:700;margin:0">📋 Lịch sử uống thuốc</h4>
                 </div>
-                <div class="history-filter">
-                    <select id="hist-patient" onchange="renderHistory()">
-                        <option value="">Tất cả bệnh nhân</option>
-                    </select>
-                    <select id="hist-status" onchange="renderHistory()">
-                        <option value="">Tất cả trạng thái</option>
-                        <option value="taken">✅ Đã uống</option>
-                        <option value="pending">⏳ Chờ uống</option>
-                        <option value="missed">❌ Bỏ lỡ</option>
-                    </select>
-                    <input type="date" id="hist-date-from" placeholder="Từ ngày" onchange="renderHistory()" />
-                    <input type="date" id="hist-date-to" placeholder="Đến ngày" onchange="renderHistory()" />
-                    <button class="btn-a-secondary" onclick="resetHistoryFilter()">↩ Reset</button>
+                <div class="a-card mb-3">
+                    <div class="a-card-body" style="padding:14px 20px">
+                        <div class="row g-2">
+                            <div class="col-md-3">
+                                <select id="hist-patient" class="form-select"
+                                    style="background:var(--bg-glass-strong);border:1px solid var(--border-glass);color:var(--text-primary);border-radius:9px">
+                                    <option value="">Tất cả bệnh nhân</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select id="hist-status" class="form-select"
+                                    style="background:var(--bg-glass-strong);border:1px solid var(--border-glass);color:var(--text-primary);border-radius:9px">
+                                    <option value="">Tất cả</option>
+                                    <option value="taken">Đã uống</option>
+                                    <option value="pending">Chờ uống</option>
+                                    <option value="missed">Bỏ lỡ</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2"><input type="date" id="hist-date-from" class="form-control"
+                                    style="background:var(--bg-glass-strong);border:1px solid var(--border-glass);color:var(--text-primary);border-radius:9px"
+                                    placeholder="Từ ngày" /></div>
+                            <div class="col-md-2"><input type="date" id="hist-date-to" class="form-control"
+                                    style="background:var(--bg-glass-strong);border:1px solid var(--border-glass);color:var(--text-primary);border-radius:9px"
+                                    placeholder="Đến ngày" /></div>
+                            <div class="col-md-1"><button class="btn-a-primary w-100"
+                                    onclick="renderHistory()">🔍</button></div>
+                            <div class="col-md-2"><button class="btn-a-secondary w-100"
+                                    onclick="resetHistoryFilter()">🔄 Reset</button></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="a-card mb-3">
+                    <div class="a-card-body" style="padding:12px 20px;font-size:.85rem" id="history-summary">Chưa có dữ
+                        liệu</div>
                 </div>
                 <div class="a-card">
                     <div style="overflow-x:auto">
@@ -386,194 +413,514 @@
                                     <th>Ngày</th>
                                     <th>Thuốc</th>
                                     <th>Bệnh nhân</th>
-                                    <th>Giờ dự kiến</th>
-                                    <th>Giờ thực tế</th>
+                                    <th>Giờ lịch</th>
+                                    <th>Giờ uống thực tế</th>
                                     <th>Liều</th>
                                     <th>Ghi chú</th>
                                     <th>Trạng thái</th>
                                 </tr>
                             </thead>
-                            <tbody id="history-tbody">
-                                <tr>
-                                    <td colspan="8" class="text-center py-4" style="color:var(--text-muted)">Đang tải...
-                                    </td>
-                                </tr>
-                            </tbody>
+                            <tbody id="history-tbody"></tbody>
                         </table>
                     </div>
-                    <div class="p-3" id="history-summary"
-                        style="border-top:1px solid var(--border-glass);font-size:.82rem;color:var(--text-muted)"></div>
                 </div>
-            </div>
+            </section>
+
+            <!-- ════ CATALOG (Thuốc & Sản phẩm trang chủ) ════ -->
+            <section id="section-catalog" class="content-section">
+                <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
+                    <div>
+                        <h4 style="font-family:'Sora',sans-serif;font-weight:700;margin:0">🏪 Thuốc & Sản phẩm (Trang
+                            chủ)</h4>
+                        <p style="font-size:.82rem;color:var(--text-muted);margin:4px 0 0">Quản lý danh mục thuốc và sản
+                            phẩm hiển thị trên trang chủ. Có thể thêm hình ảnh, liều lượng, cách dùng chi tiết.</p>
+                    </div>
+                    <button class="btn-a-primary" onclick="openAddCatalog()">➕ Thêm sản phẩm</button>
+                </div>
+                <div
+                    style="background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.2);border-radius:10px;padding:10px 16px;margin-bottom:16px;font-size:.82rem;color:var(--text-secondary)">
+                    ℹ️ Sản phẩm thêm ở đây sẽ hiển thị ngay trên trang chủ trong mục <strong
+                        style="color:var(--primary)">Thuốc & Sản phẩm</strong> và có thể tra cứu qua bác sĩ ảo MedBot.
+                </div>
+                <div class="a-card mb-3">
+                    <div class="a-card-body" style="padding:14px 20px">
+                        <input type="text" placeholder="🔍 Tìm sản phẩm theo tên..." class="form-control"
+                            style="background:var(--bg-glass-strong);border:1px solid var(--border-glass);color:var(--text-primary);border-radius:9px"
+                            oninput="renderCatalogTable(this.value)" />
+                    </div>
+                </div>
+                <div class="a-card">
+                    <div style="overflow-x:auto">
+                        <table class="a-table">
+                            <thead>
+                                <tr>
+                                    <th>Tên sản phẩm</th>
+                                    <th>Thương hiệu</th>
+                                    <th>Danh mục</th>
+                                    <th>Liều dùng</th>
+                                    <th>Giá tham khảo</th>
+                                    <th>Hình ảnh</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="catalog-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ════ NEWS ════ -->
+            <section id="section-news" class="content-section">
+                <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
+                    <div>
+                        <h4 style="font-family:'Sora',sans-serif;font-weight:700;margin:0">📰 Tin tức y tế</h4>
+                        <p style="font-size:.82rem;color:var(--text-muted);margin:4px 0 0">Quản lý tin tức hiển thị trên
+                            trang chủ. Có thể gắn link nguồn bài viết bên ngoài.</p>
+                    </div>
+                    <button class="btn-a-primary" onclick="openAddNews()">➕ Thêm tin tức</button>
+                </div>
+                <div
+                    style="background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.2);border-radius:10px;padding:10px 16px;margin-bottom:16px;font-size:.82rem;color:var(--text-secondary)">
+                    ℹ️ Tin tức thêm ở đây sẽ xuất hiện trong tab <strong style="color:var(--accent2)">Tin tức y
+                        tế</strong> và phần xem trước trang chủ. Đánh dấu 🔥 Hot để hiển thị ưu tiên.
+                </div>
+                <div class="a-card mb-3">
+                    <div class="a-card-body" style="padding:14px 20px">
+                        <input type="text" placeholder="🔍 Tìm tin tức theo tiêu đề..." class="form-control"
+                            style="background:var(--bg-glass-strong);border:1px solid var(--border-glass);color:var(--text-primary);border-radius:9px"
+                            oninput="renderNewsTable(this.value)" />
+                    </div>
+                </div>
+                <div class="a-card">
+                    <div style="overflow-x:auto">
+                        <table class="a-table">
+                            <thead>
+                                <tr>
+                                    <th>Tiêu đề</th>
+                                    <th>Danh mục</th>
+                                    <th>Nguồn</th>
+                                    <th>Ngày</th>
+                                    <th>Link</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-news-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
 
         </div><!-- /admin-content -->
     </main>
 
-    <!-- ═══ MODAL: Thuốc ═══ -->
+    <!-- ════ MODAL: MEDICATION (for schedule) ════ -->
     <div class="modal fade" id="medModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="med-modal-title">💊 Thêm thuốc</h5><button type="button"
-                        class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="med-modal-title">💉 Thêm thuốc (cho lịch uống)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form id="med-form" novalidate>
                         <input type="hidden" id="med-id-hidden" />
                         <div class="row g-3">
-                            <div class="col-md-6"><label class="form-label">Tên thuốc *</label><input type="text"
-                                    class="form-control" id="med-name" placeholder="Paracetamol 500mg" required />
+                            <div class="col-md-6">
+                                <label class="form-label">Tên thuốc *</label>
+                                <input type="text" class="form-control" id="med-name"
+                                    placeholder="Paracetamol 500mg..." />
                                 <div class="invalid-feedback">Vui lòng nhập tên thuốc</div>
                             </div>
-                            <div class="col-md-6"><label class="form-label">Danh mục</label><input type="text"
-                                    class="form-control" id="med-category" placeholder="Giảm đau, Kháng sinh..." />
+                            <div class="col-md-6">
+                                <label class="form-label">Danh mục</label>
+                                <input type="text" class="form-control" id="med-category"
+                                    placeholder="Giảm đau, Kháng sinh..." />
                             </div>
-                            <div class="col-md-6"><label class="form-label">Dạng thuốc</label>
+                            <div class="col-md-6">
+                                <label class="form-label">Dạng thuốc</label>
                                 <select class="form-select" id="med-type">
-                                    <option>Viên nén</option>
-                                    <option>Viên nang</option>
-                                    <option>Siro</option>
-                                    <option>Dung dịch</option>
-                                    <option>Ống tiêm</option>
-                                    <option>Nhỏ mắt</option>
-                                    <option>Kem/Gel</option>
+                                    <option value="Viên nén">Viên nén</option>
+                                    <option value="Viên nang">Viên nang</option>
+                                    <option value="Siro">Siro / Dung dịch</option>
+                                    <option value="Ống tiêm">Ống tiêm</option>
+                                    <option value="Nhỏ mắt">Nhỏ mắt</option>
+                                    <option value="Kem/Gel">Kem / Gel</option>
                                 </select>
                             </div>
-                            <div class="col-md-6"><label class="form-label">Liều dùng</label><input type="text"
-                                    class="form-control" id="med-dosage" placeholder="1 viên / lần" /></div>
-                            <div class="col-md-6"><label class="form-label">Tần suất</label><input type="text"
-                                    class="form-control" id="med-frequency" placeholder="3 lần/ngày" /></div>
-                            <div class="col-md-6"><label class="form-label">Giờ uống (cách nhau dấu phẩy)</label><input
-                                    type="text" class="form-control" id="med-times" placeholder="07:00, 12:00, 19:00" />
+                            <div class="col-md-6">
+                                <label class="form-label">Liều dùng</label>
+                                <input type="text" class="form-control" id="med-dosage"
+                                    placeholder="500mg, 1 viên..." />
                             </div>
-                            <div class="col-md-4"><label class="form-label">Tồn kho</label><input type="number"
-                                    class="form-control" id="med-stock" placeholder="30" min="0" /></div>
-                            <div class="col-md-4"><label class="form-label">Đơn vị</label><input type="text"
-                                    class="form-control" id="med-unit" placeholder="viên" /></div>
-                            <div class="col-md-4"><label class="form-label">Trạng thái</label>
+                            <div class="col-md-6">
+                                <label class="form-label">Tần suất</label>
+                                <input type="text" class="form-control" id="med-frequency"
+                                    placeholder="3 lần/ngày, sau ăn..." />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Giờ uống (cách nhau dấu phẩy)</label>
+                                <input type="text" class="form-control" id="med-times"
+                                    placeholder="07:00, 12:00, 19:00" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Tồn kho</label>
+                                <input type="number" class="form-control" id="med-stock" value="0" min="0" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Đơn vị</label>
+                                <input type="text" class="form-control" id="med-unit" placeholder="viên, gói, lọ..." />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Trạng thái</label>
                                 <select class="form-select" id="med-status">
                                     <option value="active">Đang dùng</option>
                                     <option value="inactive">Ngừng</option>
                                 </select>
                             </div>
-                            <div class="col-12"><label class="form-label">Ghi chú / Hướng dẫn dùng</label><textarea
-                                    class="form-control" id="med-note" rows="2"
-                                    placeholder="Uống sau bữa ăn, không dùng khi đói..."></textarea></div>
+                            <div class="col-12">
+                                <label class="form-label">Ghi chú / Hướng dẫn dùng</label>
+                                <textarea class="form-control" id="med-note" rows="2"
+                                    placeholder="Uống sau ăn 30 phút, không dùng khi dạ dày trống..."></textarea>
+                            </div>
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer"><button class="btn-a-secondary" data-bs-dismiss="modal">Hủy</button><button
-                        class="btn-a-primary" onclick="submitMedForm()">💾 Lưu thuốc</button></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-a-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn-a-primary" onclick="submitMedForm()">💾 Lưu thuốc</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- ═══ MODAL: Bệnh nhân ═══ -->
-    <div class="modal fade" id="patientModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
+    <!-- ════ MODAL: CATALOG ITEM ════ -->
+    <div class="modal fade" id="catalogModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="pat-modal-title">👤 Thêm bệnh nhân</h5><button type="button"
-                        class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="catalog-modal-title">➕ Thêm thuốc / Sản phẩm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div
+                        style="background:rgba(0,212,170,.05);border:1px solid rgba(0,212,170,.15);border-radius:10px;padding:10px 16px;margin-bottom:16px;font-size:.82rem;color:var(--text-secondary)">
+                        💡 Sản phẩm này sẽ hiển thị trên <strong style="color:var(--primary)">Trang chủ → Thuốc & Sản
+                            phẩm</strong> với hình ảnh đẹp và thông tin chi tiết. Bác sĩ ảo MedBot cũng sẽ có thể tư vấn
+                        về sản phẩm này.
+                    </div>
+                    <form id="catalog-form" novalidate>
+                        <input type="hidden" id="catalog-id-hidden" />
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Tên thuốc / Sản phẩm *</label>
+                                <input type="text" class="form-control" id="catalog-name"
+                                    placeholder="Paracetamol 500mg, Vitamin C 1000mg..." />
+                                <div class="invalid-feedback">Vui lòng nhập tên sản phẩm</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Thương hiệu / Tên biệt dược</label>
+                                <input type="text" class="form-control" id="catalog-brand"
+                                    placeholder="Panadol, Tylenol, Redoxon..." />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Danh mục</label>
+                                <select class="form-select" id="catalog-cat">
+                                    <option value="painkiller">💊 Giảm đau / Hạ sốt</option>
+                                    <option value="antibiotic">🧫 Kháng sinh</option>
+                                    <option value="stomach">🫁 Tiêu hóa</option>
+                                    <option value="vitamin">🌿 Vitamin & Bổ sung</option>
+                                    <option value="heart">❤️ Tim mạch</option>
+                                    <option value="device">🩺 Thiết bị y tế</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Dạng thuốc / Sản phẩm</label>
+                                <input type="text" class="form-control" id="catalog-type"
+                                    placeholder="Viên nén, Viên nang mềm, Thiết bị..." />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Giá tham khảo</label>
+                                <input type="text" class="form-control" id="catalog-price"
+                                    placeholder="35.000đ / vỉ 10 viên" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Liều dùng thông thường</label>
+                                <input type="text" class="form-control" id="catalog-dosage"
+                                    placeholder="500mg – 1000mg/lần" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Tần suất sử dụng</label>
+                                <input type="text" class="form-control" id="catalog-freq"
+                                    placeholder="3 lần/ngày sau bữa ăn" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Công dụng chính</label>
+                                <textarea class="form-control" id="catalog-uses" rows="2"
+                                    placeholder="Giảm đau đầu, đau răng, đau cơ, hạ sốt. An toàn cho hầu hết người dùng..."></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Tác dụng phụ thường gặp</label>
+                                <textarea class="form-control" id="catalog-side" rows="2"
+                                    placeholder="Hiếm gặp ở liều bình thường. Quá liều có thể gây tổn thương gan..."></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Lưu ý quan trọng</label>
+                                <textarea class="form-control" id="catalog-note" rows="2"
+                                    placeholder="⚠️ Tối đa 4000mg/ngày. Không dùng khi uống rượu..."></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Hướng dẫn bảo quản</label>
+                                <input type="text" class="form-control" id="catalog-store"
+                                    placeholder="Nhiệt độ phòng, tránh ẩm và ánh nắng" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Icon emoji (nếu không có ảnh)</label>
+                                <input type="text" class="form-control" id="catalog-icon" placeholder="💊 🌿 ❤️ 🩺"
+                                    maxlength="4" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">URL Hình ảnh sản phẩm</label>
+                                <input type="url" class="form-control" id="catalog-img"
+                                    placeholder="https://images.unsplash.com/photo-...?w=400&q=80"
+                                    oninput="previewCatalogImg()" />
+                                <small style="color:var(--text-muted);font-size:.75rem">Gợi ý: Dùng ảnh từ Unsplash.com
+                                    (miễn phí). Ví dụ:
+                                    https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80</small>
+                                <img id="catalog-img-preview" src="" alt="Preview" style="display:none"
+                                    onerror="this.style.display='none'" />
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-a-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn-a-primary" onclick="submitCatalogForm()">💾 Lưu sản phẩm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════ MODAL: NEWS ════ -->
+    <div class="modal fade" id="newsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="news-modal-title">➕ Thêm tin tức y tế</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="news-form" novalidate>
+                        <input type="hidden" id="news-id-hidden" />
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label">Tiêu đề tin tức *</label>
+                                <input type="text" class="form-control" id="news-title"
+                                    placeholder="WHO công bố danh sách thuốc thiết yếu 2026..." />
+                                <div class="invalid-feedback">Vui lòng nhập tiêu đề</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Danh mục</label>
+                                <select class="form-select" id="news-cat">
+                                    <option value="drug">💊 Thuốc mới</option>
+                                    <option value="disease">🦠 Dịch bệnh</option>
+                                    <option value="health">🌿 Sức khỏe</option>
+                                    <option value="tech">🤖 Y tế công nghệ</option>
+                                    <option value="policy">📋 Chính sách y tế</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Nguồn / Tác giả</label>
+                                <input type="text" class="form-control" id="news-source"
+                                    placeholder="WHO, Bộ Y tế VN, JAMA..." />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Ngày đăng</label>
+                                <input type="text" class="form-control" id="news-date" placeholder="20/05/2026" />
+                            </div>
+                            <div class="col-md-10">
+                                <label class="form-label">Link bài viết gốc</label>
+                                <input type="url" class="form-control" id="news-link"
+                                    placeholder="https://www.who.int/news/..." />
+                                <small style="color:var(--text-muted);font-size:.75rem">Dán link đến nguồn bài viết.
+                                    Người dùng nhấn "Đọc thêm" sẽ mở link này.</small>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Icon emoji</label>
+                                <input type="text" class="form-control" id="news-icon" placeholder="💊 🦠 🌿"
+                                    maxlength="4" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Tóm tắt nội dung</label>
+                                <textarea class="form-control" id="news-summary" rows="3"
+                                    placeholder="Mô tả ngắn gọn nội dung bài viết (2-3 câu)..."></textarea>
+                            </div>
+                            <div class="col-md-10">
+                                <label class="form-label">URL Hình ảnh minh họa</label>
+                                <input type="url" class="form-control" id="news-img"
+                                    placeholder="https://images.unsplash.com/photo-...?w=600&q=80" />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Đánh dấu Hot 🔥</label>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="news-hot" />
+                                    <label class="form-check-label" for="news-hot" style="font-size:.85rem">Hiển thị ưu
+                                        tiên</label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-a-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn-a-primary" onclick="submitNewsForm()">💾 Lưu tin tức</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════ MODAL: PATIENT ════ -->
+    <div class="modal fade" id="patientModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pat-modal-title">👤 Thêm bệnh nhân</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form id="patient-form" novalidate>
                         <input type="hidden" id="pat-id-hidden" />
                         <div class="row g-3">
-                            <div class="col-12"><label class="form-label">Họ và tên *</label><input type="text"
-                                    class="form-control" id="pat-name" placeholder="Nguyễn Văn A" required />
-                                <div class="invalid-feedback">Vui lòng nhập họ tên</div>
+                            <div class="col-md-6">
+                                <label class="form-label">Họ và tên *</label>
+                                <input type="text" class="form-control" id="pat-name" placeholder="Nguyễn Văn An" />
+                                <div class="invalid-feedback">Vui lòng nhập tên bệnh nhân</div>
                             </div>
-                            <div class="col-md-6"><label class="form-label">Số điện thoại</label><input type="text"
-                                    class="form-control" id="pat-phone" placeholder="0901234567" /></div>
-                            <div class="col-md-6"><label class="form-label">Ngày sinh</label><input type="date"
-                                    class="form-control" id="pat-dob" /></div>
-                            <div class="col-md-6"><label class="form-label">Giới tính</label>
+                            <div class="col-md-6">
+                                <label class="form-label">Số điện thoại</label>
+                                <input type="tel" class="form-control" id="pat-phone" placeholder="0912345678" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Ngày sinh</label>
+                                <input type="date" class="form-control" id="pat-dob" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Giới tính</label>
                                 <select class="form-select" id="pat-gender">
                                     <option value="male">Nam</option>
                                     <option value="female">Nữ</option>
                                     <option value="other">Khác</option>
                                 </select>
                             </div>
-                            <div class="col-md-6"><label class="form-label">Trạng thái</label>
+                            <div class="col-md-4">
+                                <label class="form-label">Trạng thái</label>
                                 <select class="form-select" id="pat-status">
                                     <option value="active">Đang điều trị</option>
-                                    <option value="inactive">Ngừng</option>
+                                    <option value="inactive">Ngừng điều trị</option>
                                 </select>
                             </div>
-                            <div class="col-12"><label class="form-label">Bệnh lý / Chẩn đoán</label><input type="text"
-                                    class="form-control" id="pat-diagnosis"
-                                    placeholder="Tiểu đường type 2, Cao huyết áp..." /></div>
-                            <div class="col-12"><label class="form-label">Dị ứng thuốc</label><input type="text"
-                                    class="form-control" id="pat-allergy" placeholder="Penicillin, Aspirin..." /></div>
-                            <div class="col-12"><label class="form-label">Ghi chú thêm</label><textarea
-                                    class="form-control" id="pat-note" rows="2"
-                                    placeholder="Cần theo dõi đặc biệt..."></textarea></div>
+                            <div class="col-md-6">
+                                <label class="form-label">Bệnh lý / Chẩn đoán</label>
+                                <input type="text" class="form-control" id="pat-diagnosis"
+                                    placeholder="Tăng huyết áp, Tiểu đường..." />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Dị ứng thuốc</label>
+                                <input type="text" class="form-control" id="pat-allergy"
+                                    placeholder="Penicillin, NSAID..." />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Ghi chú thêm</label>
+                                <textarea class="form-control" id="pat-note" rows="2"
+                                    placeholder="Thông tin thêm về bệnh nhân..."></textarea>
+                            </div>
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer"><button class="btn-a-secondary" data-bs-dismiss="modal">Hủy</button><button
-                        class="btn-a-primary" onclick="submitPatientForm()">💾 Lưu bệnh nhân</button></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-a-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn-a-primary" onclick="submitPatientForm()">💾 Lưu bệnh nhân</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- ═══ MODAL: Lịch uống thuốc ═══ -->
+    <!-- ════ MODAL: SCHEDULE ════ -->
     <div class="modal fade" id="scheduleModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="sched-modal-title">📅 Thêm lịch uống thuốc</h5><button type="button"
-                        class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="sched-modal-title">📅 Thêm lịch uống thuốc</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+                    <div
+                        style="background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.15);border-radius:10px;padding:10px 16px;margin-bottom:16px;font-size:.82rem;color:var(--text-secondary)">
+                        📌 Chọn bệnh nhân và thuốc từ danh sách. Thuốc ở đây là danh mục <strong>riêng cho lịch
+                            uống</strong>, khác với sản phẩm hiển thị trang chủ.
+                    </div>
                     <form id="schedule-form" novalidate>
                         <input type="hidden" id="sched-id-hidden" />
                         <div class="row g-3">
-                            <div class="col-md-6"><label class="form-label">Bệnh nhân *</label>
-                                <select class="form-select" id="sched-patientId" required>
+                            <div class="col-md-6">
+                                <label class="form-label">Bệnh nhân *</label>
+                                <select class="form-select" id="sched-patientId">
                                     <option value="">-- Chọn bệnh nhân --</option>
                                 </select>
                                 <div class="invalid-feedback">Vui lòng chọn bệnh nhân</div>
                             </div>
-                            <div class="col-md-6"><label class="form-label">Thuốc *</label>
-                                <select class="form-select" id="sched-medicationId" required onchange="autoFillMed()">
+                            <div class="col-md-6">
+                                <label class="form-label">Thuốc *</label>
+                                <select class="form-select" id="sched-medicationId" onchange="autoFillMed()">
                                     <option value="">-- Chọn thuốc --</option>
                                 </select>
                                 <div class="invalid-feedback">Vui lòng chọn thuốc</div>
                             </div>
-                            <div class="col-md-6"><label class="form-label">Ngày *</label><input type="date"
-                                    class="form-control" id="sched-date" required /></div>
-                            <div class="col-md-6"><label class="form-label">Giờ uống *</label><input type="time"
-                                    class="form-control" id="sched-time" required /></div>
-                            <div class="col-md-6"><label class="form-label">Liều dùng</label><input type="text"
-                                    class="form-control" id="sched-dosage" placeholder="1 viên" /></div>
-                            <div class="col-md-6"><label class="form-label">Trạng thái</label>
+                            <div class="col-md-4">
+                                <label class="form-label">Ngày uống *</label>
+                                <input type="date" class="form-control" id="sched-date" />
+                                <div class="invalid-feedback">Vui lòng chọn ngày</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Giờ uống *</label>
+                                <input type="time" class="form-control" id="sched-time" />
+                                <div class="invalid-feedback">Vui lòng chọn giờ</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Liều dùng</label>
+                                <input type="text" class="form-control" id="sched-dosage"
+                                    placeholder="1 viên, 500mg..." />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Trạng thái</label>
                                 <select class="form-select" id="sched-status">
-                                    <option value="pending">⏳ Chờ uống</option>
-                                    <option value="taken">✅ Đã uống</option>
-                                    <option value="missed">❌ Bỏ lỡ</option>
+                                    <option value="pending">Chờ uống</option>
+                                    <option value="taken">Đã uống</option>
+                                    <option value="missed">Bỏ lỡ</option>
                                 </select>
                             </div>
-                            <div class="col-12"><label class="form-label">Ghi chú / Hướng dẫn liều này</label><textarea
-                                    class="form-control" id="sched-note" rows="2"
-                                    placeholder="Uống sau ăn sáng, uống với nhiều nước..."></textarea></div>
+                            <div class="col-md-6">
+                                <label class="form-label">Ghi chú</label>
+                                <input type="text" class="form-control" id="sched-note"
+                                    placeholder="Uống sau ăn, uống với nhiều nước..." />
+                            </div>
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer"><button class="btn-a-secondary" data-bs-dismiss="modal">Hủy</button><button
-                        class="btn-a-primary" onclick="submitScheduleForm()">💾 Lưu lịch</button></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-a-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn-a-primary" onclick="submitScheduleForm()">💾 Lưu lịch</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- ═══ MODAL: Xem lịch sử bệnh nhân ═══ -->
+    <!-- ════ MODAL: PATIENT HISTORY ════ -->
     <div class="modal fade" id="patHistModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="pat-hist-title">📋 Lịch sử uống thuốc</h5><button type="button"
-                        class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="pat-hist-title">📋 Lịch sử bệnh nhân</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" style="overflow-x:auto">
                     <table class="a-table">
@@ -581,33 +928,37 @@
                             <tr>
                                 <th>Ngày</th>
                                 <th>Thuốc</th>
-                                <th>Giờ</th>
+                                <th>Giờ lịch</th>
                                 <th>Liều</th>
                                 <th>Ghi chú</th>
                                 <th>Trạng thái</th>
-                                <th>Giờ uống thực tế</th>
+                                <th>Giờ uống</th>
                             </tr>
                         </thead>
                         <tbody id="pat-hist-tbody"></tbody>
                     </table>
                 </div>
-                <div class="modal-footer"><button class="btn-a-secondary" data-bs-dismiss="modal">Đóng</button></div>
+                <div class="modal-footer"><button type="button" class="btn-a-secondary"
+                        data-bs-dismiss="modal">Đóng</button></div>
             </div>
         </div>
     </div>
 
-    <!-- ═══ CONFIRM DELETE ═══ -->
+    <!-- ════ MODAL: CONFIRM DELETE ════ -->
     <div class="modal fade" id="confirmModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content text-center p-4">
-                <div style="font-size:2.5rem;margin-bottom:12px">⚠️</div>
-                <h5 style="font-family:'Sora',sans-serif;font-weight:700;margin-bottom:8px" id="confirm-title">Xác nhận
-                    xóa</h5>
-                <p style="color:var(--text-secondary);font-size:.88rem;margin-bottom:24px" id="confirm-msg">Bạn có chắc
-                    chắn muốn xóa?</p>
-                <div class="d-flex gap-2 justify-content-center">
-                    <button class="btn-a-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button class="btn-a-danger" id="confirm-ok-btn">🗑️ Xóa</button>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header" style="border-bottom:1px solid var(--border-glass)">
+                    <h5 class="modal-title" id="confirm-title" style="color:var(--accent)">⚠️ Xác nhận xóa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="padding:24px">
+                    <p id="confirm-msg" style="color:var(--text-secondary);margin:0;line-height:1.7"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-a-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" id="confirm-ok-btn" class="btn-a-danger"
+                        style="padding:9px 20px;font-size:.85rem">🗑️ Xác nhận xóa</button>
                 </div>
             </div>
         </div>
