@@ -1,6 +1,6 @@
 // ============================================================
-//  admin.js – Admin panel nâng cấp toàn diện
-//  MedReminder – Đề tài 09
+//  admin.js – Admin panel v3.0
+//  Thêm: Quản lý Catalog thuốc & Sản phẩm, Quản lý Tin tức y tế
 // ============================================================
 
 let adminMeds = [];
@@ -9,17 +9,24 @@ let adminSchedules = [];
 let editingMedId = null;
 let editingPatId = null;
 let editingSchedId = null;
+let editingCatalogId = null;
+let editingNewsId = null;
 let pendingDeleteFn = null;
+
+// Admin-managed catalog items (separate from schedule meds)
+let adminCatalogItems = JSON.parse(localStorage.getItem("medreminder_catalog") || "[]");
+let adminNewsItems = JSON.parse(localStorage.getItem("medreminder_news") || "[]");
 
 // ─── Init ─────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", function () {
     checkAuth();
     loadAdminData();
-    // Set today as default date filter
     const today = getTodayString();
     const dInput = document.getElementById("filter-sched-date");
     if (dInput) dInput.value = today;
     $(".admin-main").hide().fadeIn(500);
+    renderCatalogTable();
+    renderNewsTable();
 });
 
 function checkAuth() {
@@ -50,7 +57,16 @@ window.toggleSidebar = toggleSidebar;
 window.closeSidebar = closeSidebar;
 
 // ─── Section navigation ────────────────────────────────────────
-const SECTION_TITLES = { dashboard: "📊 Tổng quan", medications: "💊 Quản lý thuốc", patients: "👥 Bệnh nhân", schedules: "📅 Lịch uống thuốc", history: "📋 Lịch sử uống thuốc" };
+const SECTION_TITLES = {
+    dashboard: "📊 Tổng quan",
+    medications: "💊 Quản lý thuốc (Lịch uống)",
+    patients: "👥 Bệnh nhân",
+    schedules: "📅 Lịch uống thuốc",
+    history: "📋 Lịch sử uống thuốc",
+    catalog: "🏪 Thuốc & Sản phẩm (Trang chủ)",
+    news: "📰 Tin tức y tế"
+};
+
 function showSection(name, navEl) {
     document.querySelectorAll(".content-section").forEach(s => s.classList.remove("active"));
     const sec = document.getElementById("section-" + name);
@@ -60,13 +76,14 @@ function showSection(name, navEl) {
     const ttl = document.getElementById("topbar-title");
     if (ttl) ttl.textContent = SECTION_TITLES[name] || name;
     closeSidebar();
-    // Lazy render
     if (name === "history") renderHistory();
     if (name === "patients") renderPatientCards();
+    if (name === "catalog") renderCatalogTable();
+    if (name === "news") renderNewsTable();
 }
 window.showSection = showSection;
 
-// ─── Load data ─────────────────────────────────────────────────
+// ─── Load API data ─────────────────────────────────────────────
 async function loadAdminData() {
     try {
         const [meds, patients, schedules] = await Promise.all([getMedications(), getPatients(), getSchedules()]);
@@ -82,17 +99,13 @@ async function loadAdminData() {
     }
 }
 
-// ─── Populate selects ──────────────────────────────────────────
 function populateFilterSelects() {
-    // Schedule modal
     const patSel = document.getElementById("sched-patientId");
     const medSel = document.getElementById("sched-medicationId");
     if (patSel) patSel.innerHTML = `<option value="">-- Chọn bệnh nhân --</option>` + adminPatients.map(p => `<option value="${p.id}">${p.name}</option>`).join("");
     if (medSel) medSel.innerHTML = `<option value="">-- Chọn thuốc --</option>` + adminMeds.map(m => `<option value="${m.id}">${m.name}</option>`).join("");
-    // Schedule filter
     const fPat = document.getElementById("filter-sched-patient");
     if (fPat) fPat.innerHTML = `<option value="">Tất cả bệnh nhân</option>` + adminPatients.map(p => `<option value="${p.id}">${p.name}</option>`).join("");
-    // History filters
     const hPat = document.getElementById("hist-patient");
     if (hPat) hPat.innerHTML = `<option value="">Tất cả bệnh nhân</option>` + adminPatients.map(p => `<option value="${p.id}">${p.name}</option>`).join("");
 }
@@ -110,9 +123,10 @@ function renderDashboard() {
     set("dash-meds", adminMeds.length); set("dash-patients", adminPatients.length);
     set("dash-schedules", total); set("dash-taken", taken); set("dash-missed", missed); set("dash-pending", pending);
     set("dash-pct", pct + "%");
+    set("dash-catalog-count", adminCatalogItems.length);
+    set("dash-news-count", adminNewsItems.length);
     const bar = document.getElementById("dash-progress");
     if (bar) bar.style.width = pct + "%";
-    // Today's schedule table
     const tbody = document.getElementById("dash-sched-body");
     if (!tbody) return;
     if (todayScheds.length === 0) { tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4" style="color:var(--text-muted)">Không có lịch hôm nay</td></tr>`; return; }
@@ -129,7 +143,7 @@ function renderDashboard() {
     }).join("");
 }
 
-// ─── MEDICATIONS ───────────────────────────────────────────────
+// ─── MEDICATIONS (for schedule) ────────────────────────────────
 function renderMedTable(filter = "") {
     const tbody = document.getElementById("med-tbody");
     if (!tbody) return;
@@ -158,7 +172,7 @@ function openAddMed() {
     editingMedId = null;
     document.getElementById("med-form").reset();
     document.getElementById("med-id-hidden").value = "";
-    document.getElementById("med-modal-title").textContent = "➕ Thêm thuốc mới";
+    document.getElementById("med-modal-title").textContent = "➕ Thêm thuốc (cho lịch uống)";
     new bootstrap.Modal(document.getElementById("medModal")).show();
 }
 function openEditMed(id) {
@@ -204,6 +218,233 @@ async function deleteMedAction(id) {
 window.openAddMed = openAddMed;
 window.openEditMed = openEditMed;
 window.submitMedForm = submitMedForm;
+
+// ─── CATALOG MANAGEMENT (Trang chủ - Thuốc & Sản phẩm) ────────
+function saveCatalog() {
+    localStorage.setItem("medreminder_catalog", JSON.stringify(adminCatalogItems));
+}
+
+function renderCatalogTable(filter = "") {
+    const tbody = document.getElementById("catalog-tbody");
+    if (!tbody) return;
+    let list = [...adminCatalogItems];
+    if (filter) list = list.filter(m => (m.name || "").toLowerCase().includes(filter.toLowerCase()));
+    if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4" style="color:var(--text-muted)">Chưa có sản phẩm nào. Nhấn "Thêm sản phẩm" để bắt đầu.</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = list.map((m, idx) => `<tr>
+        <td>
+            ${m.img ? `<img src="${m.img}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;margin-right:8px" onerror="this.style.display='none'" />` : `<span style="font-size:1.4rem;margin-right:8px">${m.icon || "💊"}</span>`}
+            <strong>${m.name}</strong>
+        </td>
+        <td><span style="font-size:.8rem;color:var(--text-muted)">${m.brand || "—"}</span></td>
+        <td><span class="badge-status badge-active" style="font-size:.7rem">${m.cat || "—"}</span></td>
+        <td style="font-size:.8rem">${m.dosage || "—"}</td>
+        <td style="font-size:.78rem;color:var(--primary)">${m.price || "—"}</td>
+        <td>
+            <span class="badge-status ${m.img ? 'badge-taken' : 'badge-pending'}" style="font-size:.68rem">
+                ${m.img ? '🖼️ Có ảnh' : '📦 Chỉ icon'}
+            </span>
+        </td>
+        <td>
+            <button class="btn-a-secondary" style="padding:5px 10px;font-size:.76rem;margin-right:4px" onclick="openEditCatalog(${idx})">✏️</button>
+            <button class="btn-a-danger" style="padding:5px 10px;font-size:.76rem" onclick="deleteCatalogItem(${idx})">🗑️</button>
+        </td>
+    </tr>`).join("");
+}
+window.renderCatalogTable = renderCatalogTable;
+
+function openAddCatalog() {
+    editingCatalogId = null;
+    document.getElementById("catalog-form").reset();
+    document.getElementById("catalog-id-hidden").value = "";
+    document.getElementById("catalog-modal-title").textContent = "➕ Thêm thuốc / Sản phẩm";
+    document.getElementById("catalog-img-preview").style.display = "none";
+    new bootstrap.Modal(document.getElementById("catalogModal")).show();
+}
+window.openAddCatalog = openAddCatalog;
+
+function openEditCatalog(idx) {
+    editingCatalogId = idx;
+    const item = adminCatalogItems[idx];
+    if (!item) return;
+    document.getElementById("catalog-modal-title").textContent = "✏️ Chỉnh sửa sản phẩm";
+    document.getElementById("catalog-id-hidden").value = idx;
+    const f = (fId, val) => { const el = document.getElementById(fId); if (el) el.value = val ?? ""; };
+    f("catalog-name", item.name); f("catalog-brand", item.brand); f("catalog-cat", item.cat);
+    f("catalog-type", item.type); f("catalog-dosage", item.dosage); f("catalog-freq", item.freq);
+    f("catalog-uses", item.uses); f("catalog-side", item.side); f("catalog-note", item.note);
+    f("catalog-store", item.store); f("catalog-price", item.price); f("catalog-img", item.img);
+    f("catalog-icon", item.icon);
+    const preview = document.getElementById("catalog-img-preview");
+    if (item.img && preview) { preview.src = item.img; preview.style.display = "block"; }
+    new bootstrap.Modal(document.getElementById("catalogModal")).show();
+}
+window.openEditCatalog = openEditCatalog;
+
+function previewCatalogImg() {
+    const url = document.getElementById("catalog-img")?.value.trim();
+    const preview = document.getElementById("catalog-img-preview");
+    if (!preview) return;
+    if (url) { preview.src = url; preview.style.display = "block"; preview.onerror = () => { preview.style.display = "none"; }; }
+    else preview.style.display = "none";
+}
+window.previewCatalogImg = previewCatalogImg;
+
+function submitCatalogForm() {
+    const name = document.getElementById("catalog-name");
+    if (!name.value.trim()) { name.classList.add("is-invalid"); return; }
+    name.classList.remove("is-invalid");
+
+    const catMap = { painkiller: "painkiller", antibiotic: "antibiotic", stomach: "stomach", vitamin: "vitamin", heart: "heart", device: "device" };
+    const catVal = document.getElementById("catalog-cat")?.value || "painkiller";
+
+    const item = {
+        id: "ext_" + Date.now(),
+        name: document.getElementById("catalog-name").value.trim(),
+        brand: document.getElementById("catalog-brand").value.trim(),
+        cat: catVal,
+        type: document.getElementById("catalog-type").value.trim() || "Viên nén",
+        dosage: document.getElementById("catalog-dosage").value.trim(),
+        freq: document.getElementById("catalog-freq").value.trim(),
+        uses: document.getElementById("catalog-uses").value.trim(),
+        side: document.getElementById("catalog-side").value.trim(),
+        note: document.getElementById("catalog-note").value.trim(),
+        store: document.getElementById("catalog-store").value.trim(),
+        price: document.getElementById("catalog-price").value.trim(),
+        img: document.getElementById("catalog-img").value.trim(),
+        icon: document.getElementById("catalog-icon").value.trim() || "💊",
+    };
+
+    if (editingCatalogId !== null) {
+        item.id = adminCatalogItems[editingCatalogId].id;
+        adminCatalogItems[editingCatalogId] = item;
+        showToast("Đã cập nhật sản phẩm!", "success");
+    } else {
+        adminCatalogItems.push(item);
+        showToast("Đã thêm sản phẩm mới!", "success");
+    }
+    saveCatalog();
+    renderCatalogTable();
+    const countEl = document.getElementById("dash-catalog-count");
+    if (countEl) countEl.textContent = adminCatalogItems.length;
+    bootstrap.Modal.getInstance(document.getElementById("catalogModal"))?.hide();
+}
+window.submitCatalogForm = submitCatalogForm;
+
+function deleteCatalogItem(idx) {
+    confirmDelete("Xóa sản phẩm", `Xóa <b>${adminCatalogItems[idx]?.name}</b> khỏi danh mục?`, () => {
+        adminCatalogItems.splice(idx, 1);
+        saveCatalog();
+        renderCatalogTable();
+        showToast("Đã xóa sản phẩm!", "success");
+    });
+}
+window.deleteCatalogItem = deleteCatalogItem;
+
+// ─── NEWS MANAGEMENT ──────────────────────────────────────────
+function saveNews() {
+    localStorage.setItem("medreminder_news", JSON.stringify(adminNewsItems));
+}
+
+function renderNewsTable(filter = "") {
+    const tbody = document.getElementById("admin-news-tbody");
+    if (!tbody) return;
+    let list = [...adminNewsItems];
+    if (filter) list = list.filter(n => (n.title || "").toLowerCase().includes(filter.toLowerCase()));
+    if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4" style="color:var(--text-muted)">Chưa có tin tức nào. Nhấn "Thêm tin tức" để bắt đầu.</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = list.map((n, idx) => `<tr>
+        <td>
+            <span style="font-size:1.2rem;margin-right:6px">${n.icon || "📰"}</span>
+            <strong style="font-size:.85rem">${n.title}</strong>
+            ${n.hot ? '<span class="badge-status badge-active" style="font-size:.65rem;margin-left:6px">🔥 Hot</span>' : ''}
+        </td>
+        <td><span class="badge-status badge-pending" style="font-size:.7rem">${n.cat || "—"}</span></td>
+        <td style="font-size:.78rem;color:var(--text-muted)">${n.source || "—"}</td>
+        <td style="font-size:.78rem">${n.date || "—"}</td>
+        <td>
+            ${n.link ? `<a href="${n.link}" target="_blank" style="color:var(--primary);font-size:.78rem;text-decoration:none">🔗 Xem</a>` : '—'}
+        </td>
+        <td>
+            <button class="btn-a-secondary" style="padding:5px 10px;font-size:.76rem;margin-right:4px" onclick="openEditNews(${idx})">✏️</button>
+            <button class="btn-a-danger" style="padding:5px 10px;font-size:.76rem" onclick="deleteNewsItem(${idx})">🗑️</button>
+        </td>
+    </tr>`).join("");
+}
+window.renderNewsTable = renderNewsTable;
+
+function openAddNews() {
+    editingNewsId = null;
+    document.getElementById("news-form").reset();
+    document.getElementById("news-id-hidden").value = "";
+    document.getElementById("news-modal-title").textContent = "➕ Thêm tin tức y tế";
+    new bootstrap.Modal(document.getElementById("newsModal")).show();
+}
+window.openAddNews = openAddNews;
+
+function openEditNews(idx) {
+    editingNewsId = idx;
+    const item = adminNewsItems[idx];
+    if (!item) return;
+    document.getElementById("news-modal-title").textContent = "✏️ Chỉnh sửa tin tức";
+    document.getElementById("news-id-hidden").value = idx;
+    const f = (fId, val) => { const el = document.getElementById(fId); if (el) el.value = val ?? ""; };
+    f("news-title", item.title); f("news-cat", item.cat); f("news-source", item.source);
+    f("news-date", item.date); f("news-link", item.link); f("news-summary", item.summary);
+    f("news-img", item.img); f("news-icon", item.icon);
+    const hotEl = document.getElementById("news-hot");
+    if (hotEl) hotEl.checked = !!item.hot;
+    new bootstrap.Modal(document.getElementById("newsModal")).show();
+}
+window.openEditNews = openEditNews;
+
+function submitNewsForm() {
+    const title = document.getElementById("news-title");
+    if (!title.value.trim()) { title.classList.add("is-invalid"); return; }
+    title.classList.remove("is-invalid");
+
+    const item = {
+        id: "news_" + Date.now(),
+        title: document.getElementById("news-title").value.trim(),
+        cat: document.getElementById("news-cat").value || "health",
+        source: document.getElementById("news-source").value.trim(),
+        date: document.getElementById("news-date").value.trim(),
+        link: document.getElementById("news-link").value.trim(),
+        summary: document.getElementById("news-summary").value.trim(),
+        img: document.getElementById("news-img").value.trim(),
+        icon: document.getElementById("news-icon").value.trim() || "📰",
+        hot: document.getElementById("news-hot")?.checked || false,
+    };
+
+    if (editingNewsId !== null) {
+        item.id = adminNewsItems[editingNewsId].id;
+        adminNewsItems[editingNewsId] = item;
+        showToast("Đã cập nhật tin tức!", "success");
+    } else {
+        adminNewsItems.push(item);
+        showToast("Đã thêm tin tức mới!", "success");
+    }
+    saveNews();
+    renderNewsTable();
+    const countEl = document.getElementById("dash-news-count");
+    if (countEl) countEl.textContent = adminNewsItems.length;
+    bootstrap.Modal.getInstance(document.getElementById("newsModal"))?.hide();
+}
+window.submitNewsForm = submitNewsForm;
+
+function deleteNewsItem(idx) {
+    confirmDelete("Xóa tin tức", `Xóa tin tức <b>${adminNewsItems[idx]?.title?.substring(0, 40)}...</b>?`, () => {
+        adminNewsItems.splice(idx, 1);
+        saveNews();
+        renderNewsTable();
+        showToast("Đã xóa tin tức!", "success");
+    });
+}
+window.deleteNewsItem = deleteNewsItem;
 
 // ─── PATIENTS ──────────────────────────────────────────────────
 function renderPatientCards(filter = "") {
@@ -439,7 +680,6 @@ function renderHistory() {
             </tr>`;
         }).join("");
     }
-    // Summary
     const taken = list.filter(s => s.status === "taken").length;
     const missed = list.filter(s => s.status === "missed").length;
     const pct = list.length > 0 ? Math.round((taken / list.length) * 100) : 0;
@@ -468,10 +708,8 @@ window.confirmDelete = confirmDelete;
 window.showToast = function (message, type = "info") {
     const container = document.getElementById("toast-container");
     if (!container) return;
-    const id = "toast-" + Date.now();
     const colors = { success: "rgba(76,175,80,0.3)", error: "rgba(255,107,157,0.3)", info: "rgba(0,212,170,0.3)" };
     const div = document.createElement("div");
-    div.id = id;
     div.style.cssText = `background:rgba(6,16,32,0.97);border:1px solid ${colors[type] || colors.info};border-radius:12px;padding:12px 18px;color:#f0f8ff;font-size:.87rem;font-weight:500;margin-bottom:8px;box-shadow:0 8px 24px rgba(0,0,0,0.4);animation:slideIn .3s ease;max-width:320px`;
     div.innerHTML = message;
     container.appendChild(div);
