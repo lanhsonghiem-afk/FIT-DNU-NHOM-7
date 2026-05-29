@@ -8,6 +8,521 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="css/style.css" />
+    <style>
+        /* ── Home Preview Cards ── */
+        .home-preview-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 14px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all .25s;
+        }
+
+        .home-preview-card:hover {
+            border-color: var(--border-primary);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(0, 212, 170, 0.12);
+        }
+
+        .hpc-img-wrap {
+            height: 120px;
+            overflow: hidden;
+            position: relative;
+            background: var(--bg-glass-strong);
+        }
+
+        .hpc-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform .3s;
+        }
+
+        .home-preview-card:hover .hpc-img {
+            transform: scale(1.05);
+        }
+
+        .hpc-icon-fallback {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+
+        .hpc-info {
+            padding: 12px;
+        }
+
+        .hpc-name {
+            font-family: 'Sora', sans-serif;
+            font-weight: 700;
+            font-size: .85rem;
+            margin-bottom: 3px;
+        }
+
+        .hpc-cat {
+            font-size: .75rem;
+            color: var(--text-muted);
+        }
+
+        /* ── Home News Cards ── */
+        .home-news-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 14px;
+            overflow: hidden;
+            transition: .25s;
+            height: 100%;
+        }
+
+        .home-news-card:hover {
+            border-color: var(--border-primary);
+            transform: translateY(-3px);
+        }
+
+        .hnc-img-wrap {
+            height: 160px;
+            overflow: hidden;
+            position: relative;
+            background: var(--bg-glass-strong);
+        }
+
+        .hnc-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform .3s;
+        }
+
+        .home-news-card:hover .hnc-img {
+            transform: scale(1.05);
+        }
+
+        .hnc-body {
+            padding: 14px;
+        }
+
+        .hnc-title {
+            font-family: 'Sora', sans-serif;
+            font-weight: 700;
+            font-size: .88rem;
+            line-height: 1.45;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .hnc-meta {
+            font-size: .75rem;
+            color: var(--text-muted);
+        }
+
+        /* ── Med Product Card with image ── */
+        .med-product-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: .25s;
+        }
+
+        .med-product-card:hover {
+            border-color: var(--border-primary);
+            transform: translateY(-3px);
+            box-shadow: 0 16px 40px rgba(0, 212, 170, 0.12);
+        }
+
+        .mpc-img-wrap {
+            height: 160px;
+            overflow: hidden;
+            position: relative;
+            background: var(--bg-glass-strong);
+        }
+
+        .mpc-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform .3s;
+        }
+
+        .med-product-card:hover .mpc-img {
+            transform: scale(1.05);
+        }
+
+        .mpc-icon-fallback {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            background: linear-gradient(135deg, rgba(0, 212, 170, .08), rgba(167, 139, 250, .08));
+        }
+
+        .mpc-body {
+            padding: 16px;
+        }
+
+        .mpc-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .mpc-name {
+            font-family: 'Sora', sans-serif;
+            font-weight: 700;
+            font-size: .92rem;
+            margin-bottom: 2px;
+        }
+
+        .mpc-brand {
+            font-size: .75rem;
+            color: var(--text-muted);
+        }
+
+        .mpc-type-badge {
+            background: rgba(167, 139, 250, .12);
+            color: var(--accent2);
+            border: 1px solid rgba(167, 139, 250, .2);
+            padding: 2px 8px;
+            border-radius: 100px;
+            font-size: .65rem;
+            font-weight: 700;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .mpc-uses {
+            font-size: .82rem;
+            color: var(--text-secondary);
+            line-height: 1.55;
+            margin-bottom: 10px;
+        }
+
+        .mpc-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .mpc-dosage {
+            font-size: .78rem;
+            color: var(--text-muted);
+        }
+
+        .mpc-price {
+            font-size: .78rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .mpc-detail-link {
+            font-size: .78rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* ── News card with image ── */
+        .news-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: .25s;
+            height: 100%;
+        }
+
+        .news-card:hover {
+            border-color: var(--border-primary);
+            transform: translateY(-3px);
+        }
+
+        .news-card-img-wrap {
+            height: 180px;
+            overflow: hidden;
+            position: relative;
+            background: var(--bg-glass-strong);
+        }
+
+        .news-card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform .3s;
+        }
+
+        .news-card:hover .news-card-img {
+            transform: scale(1.04);
+        }
+
+        .news-card-body {
+            padding: 16px;
+        }
+
+        .news-card-header {
+            margin-bottom: 8px;
+        }
+
+        .news-title {
+            font-family: 'Sora', sans-serif;
+            font-weight: 700;
+            font-size: .9rem;
+            line-height: 1.45;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .news-summary {
+            font-size: .82rem;
+            color: var(--text-secondary);
+            line-height: 1.55;
+            margin-bottom: 10px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .news-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: .75rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .news-read-more {
+            font-size: .8rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .news-hot-badge {
+            background: rgba(255, 107, 157, .15);
+            color: var(--accent);
+            border: 1px solid rgba(255, 107, 157, .3);
+            padding: 2px 8px;
+            border-radius: 100px;
+            font-size: .68rem;
+            font-weight: 700;
+        }
+
+        /* ── Detail modal image ── */
+        #detail-med-img {
+            width: 100%;
+            max-height: 220px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        /* ── Chatbot Tabs ── */
+        .cb-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-glass);
+            background: rgba(255, 255, 255, .02);
+        }
+
+        .cb-tab-btn {
+            flex: 1;
+            padding: 10px 4px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: .78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            border-bottom: 2px solid transparent;
+        }
+
+        .cb-tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: rgba(0, 212, 170, .04);
+        }
+
+        .cb-tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        /* FAQ Pane */
+        #cb-pane-faq {
+            flex-direction: column;
+            height: 380px;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .faq-item {
+            border: 1px solid var(--border-glass);
+            border-radius: 10px;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+
+        .faq-question {
+            padding: 10px 14px;
+            cursor: pointer;
+            font-size: .83rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            transition: background .2s;
+        }
+
+        .faq-question:hover {
+            background: rgba(255, 255, 255, .04);
+        }
+
+        .faq-arrow {
+            color: var(--primary);
+            font-size: .7rem;
+            flex-shrink: 0;
+        }
+
+        .faq-answer {
+            padding: 10px 14px;
+            font-size: .8rem;
+            color: var(--text-secondary);
+            line-height: 1.65;
+            border-top: 1px solid var(--border-glass);
+            background: rgba(0, 212, 170, .03);
+        }
+
+        /* Contact Pane */
+        #cb-pane-contact {
+            flex-direction: column;
+            height: 380px;
+            overflow-y: auto;
+            padding: 14px;
+            gap: 10px;
+        }
+
+        .contact-info-block {
+            background: rgba(0, 212, 170, .06);
+            border: 1px solid rgba(0, 212, 170, .15);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .contact-info-block div {
+            font-size: .82rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .cb-input-field {
+            width: 100%;
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid var(--border-glass);
+            border-radius: 8px;
+            color: var(--text-primary);
+            padding: 9px 12px;
+            font-size: .82rem;
+            outline: none;
+            margin-bottom: 8px;
+            font-family: 'DM Sans', sans-serif;
+            transition: .2s;
+        }
+
+        .cb-input-field:focus {
+            border-color: rgba(0, 212, 170, .4);
+            background: rgba(0, 212, 170, .03);
+        }
+
+        .cb-input-field::placeholder {
+            color: var(--text-muted);
+        }
+
+        textarea.cb-input-field {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        .cb-submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #040d1a;
+            border: none;
+            border-radius: 8px;
+            padding: 9px;
+            font-family: 'Sora', sans-serif;
+            font-size: .82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .cb-submit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0, 212, 170, .3);
+        }
+
+        #contact-result {
+            font-size: .8rem;
+            text-align: center;
+            margin-top: 4px;
+            min-height: 20px;
+        }
+
+        /* Search image */
+        .sd-img {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        /* ── Home section titles ── */
+        .home-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .home-section-header h3 {
+            font-family: 'Sora', sans-serif;
+            font-weight: 700;
+            font-size: 1.15rem;
+            margin: 0;
+        }
+
+        .home-section-header a {
+            font-size: .83rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
 </head>
 
 <body>
@@ -26,16 +541,12 @@
                 <a href="index.html" class="navbar-brand-med">
                     <div class="brand-icon">💊</div>MedReminder
                 </a>
-
-                <!-- Global Search Bar -->
                 <div class="navbar-search-wrap" id="navbar-search-wrap">
                     <span class="search-icon-nav"><i class="bi bi-search"></i></span>
                     <input type="text" id="global-search" placeholder="Tìm thuốc, thông tin y tế..."
                         autocomplete="off" />
                     <div class="search-dropdown" id="search-dropdown"></div>
                 </div>
-
-                <!-- Nav Tabs -->
                 <div class="d-flex align-items-center gap-1 flex-wrap nav-tabs-med">
                     <a href="#" class="nav-link-med active" data-tab="home" onclick="switchTab('home',event)">🏠 Trang
                         chủ</a>
@@ -46,9 +557,8 @@
                     <a href="#" class="nav-link-med" data-tab="news" onclick="switchTab('news',event)">📰 Tin tức y
                         tế</a>
                 </div>
-
                 <div class="d-flex align-items-center gap-2" id="nav-auth-area">
-                    <a href="login.html" class="btn-outline-med" style="font-size:0.82rem;padding:8px 16px"
+                    <a href="login.html" class="btn-outline-med" style="font-size:.82rem;padding:8px 16px"
                         id="nav-login-btn">Đăng nhập</a>
                     <a href="admin.html" class="btn-nav-admin" id="nav-admin-btn" style="display:none">⚙️ Quản trị</a>
                     <button class="btn-logout-sm" id="nav-logout-btn" style="display:none" onclick="logoutUser()">🚪
@@ -71,9 +581,8 @@
                             <div class="user-role" id="banner-role">–</div>
                         </div>
                     </div>
-                    <div style="font-size:0.82rem;color:var(--text-muted)">
-                        📅 Đang xem lịch của: <strong id="banner-patient" style="color:var(--primary)">–</strong>
-                    </div>
+                    <div style="font-size:.82rem;color:var(--text-muted)">📅 Đang xem lịch của: <strong
+                            id="banner-patient" style="color:var(--primary)">–</strong></div>
                 </div>
                 <div class="row align-items-center g-5">
                     <div class="col-lg-6">
@@ -84,14 +593,14 @@
                         <div class="d-flex gap-3 flex-wrap mb-4">
                             <a href="#" class="btn-primary-med" onclick="switchTab('schedule',event)">📅 Xem lịch hôm
                                 nay</a>
-                            <a href="#" class="btn-outline-med" onclick="switchTab('medicines',event)">💊 Danh sách
+                            <a href="#" class="btn-outline-med" onclick="switchTab('medicines',event)">💊 Tra cứu
                                 thuốc</a>
                         </div>
                         <div class="hero-stats">
                             <div class="hero-stat"><span class="num" id="hero-stat-meds">–</span><span
                                     class="label">Loại thuốc</span></div>
                             <div class="hero-stat"
-                                style="padding:0 20px;border-left:1px solid rgba(255,255,255,0.1);border-right:1px solid rgba(255,255,255,0.1)">
+                                style="padding:0 20px;border-left:1px solid rgba(255,255,255,.1);border-right:1px solid rgba(255,255,255,.1)">
                                 <span class="num" id="hero-stat-patients">–</span><span class="label">Bệnh nhân</span>
                             </div>
                             <div class="hero-stat"><span class="num">98%</span><span class="label">Tỉ lệ tuân thủ</span>
@@ -113,8 +622,8 @@
             </div>
         </section>
 
-        <!-- QUICK FEATURE CARDS -->
-        <section style="position:relative;z-index:1;padding:0 0 60px">
+        <!-- QUICK CARDS -->
+        <section style="position:relative;z-index:1;padding:0 0 40px">
             <div class="container">
                 <div class="row g-3 mb-4">
                     <div class="col-6 col-md-3">
@@ -147,8 +656,8 @@
                     </div>
                 </div>
 
-                <!-- Preview stats -->
-                <div class="row g-3">
+                <!-- Stats -->
+                <div class="row g-3 mb-4">
                     <div class="col-6 col-md-3">
                         <div class="stat-card"><span class="stat-icon">💊</span>
                             <div class="stat-value" id="stat-total">–</div>
@@ -174,15 +683,66 @@
                         </div>
                     </div>
                 </div>
-                <div class="mt-4 glass-card p-4">
+                <div class="glass-card p-4 mb-5">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span style="font-family:'Sora',sans-serif;font-weight:600;font-size:0.9rem">Tiến độ hôm
+                        <span style="font-family:'Sora',sans-serif;font-weight:600;font-size:.9rem">Tiến độ hôm
                             nay</span>
-                        <span style="font-size:0.8rem;color:var(--text-secondary)">Cập nhật theo thời gian thực</span>
+                        <span style="font-size:.8rem;color:var(--text-secondary)">Cập nhật theo thời gian thực</span>
                     </div>
-                    <div style="background:rgba(255,255,255,0.06);border-radius:100px;height:10px;overflow:hidden">
+                    <div style="background:rgba(255,255,255,.06);border-radius:100px;height:10px;overflow:hidden">
                         <div id="progress-bar"
-                            style="height:100%;background:linear-gradient(90deg,var(--primary),var(--accent2));border-radius:100px;transition:width .6s ease;width:0%;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:0.65rem;font-weight:700;color:#040d1a">
+                            style="height:100%;background:linear-gradient(90deg,var(--primary),var(--accent2));border-radius:100px;transition:width .6s ease;width:0%;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:.65rem;font-weight:700;color:#040d1a">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Featured Medicines Preview -->
+                <div class="home-section-header">
+                    <h3>💊 Thuốc & Sản phẩm nổi bật</h3>
+                    <a href="#" onclick="switchTab('medicines',event)">Xem tất cả →</a>
+                </div>
+                <div class="row g-3 mb-5" id="home-med-preview">
+                    <div class="col-6 col-md-3">
+                        <div
+                            style="height:160px;background:var(--bg-glass);border-radius:14px;border:1px solid var(--border-glass)">
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div
+                            style="height:160px;background:var(--bg-glass);border-radius:14px;border:1px solid var(--border-glass)">
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div
+                            style="height:160px;background:var(--bg-glass);border-radius:14px;border:1px solid var(--border-glass)">
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div
+                            style="height:160px;background:var(--bg-glass);border-radius:14px;border:1px solid var(--border-glass)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hot News Preview -->
+                <div class="home-section-header">
+                    <h3>📰 Tin tức y tế nổi bật</h3>
+                    <a href="#" onclick="switchTab('news',event)">Xem tất cả →</a>
+                </div>
+                <div class="row g-4" id="home-news-preview">
+                    <div class="col-md-4">
+                        <div
+                            style="height:250px;background:var(--bg-glass);border-radius:14px;border:1px solid var(--border-glass)">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div
+                            style="height:250px;background:var(--bg-glass);border-radius:14px;border:1px solid var(--border-glass)">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div
+                            style="height:250px;background:var(--bg-glass);border-radius:14px;border:1px solid var(--border-glass)">
                         </div>
                     </div>
                 </div>
@@ -192,7 +752,6 @@
 
     <!-- ═══ TAB: SCHEDULE ═══ -->
     <div id="tab-schedule" class="tab-content-med" style="display:none">
-        <!-- Auth gate -->
         <div id="schedule-auth-gate" class="auth-gate-section" style="display:none">
             <div class="auth-gate-card">
                 <div style="font-size:3rem;margin-bottom:16px">🔒</div>
@@ -202,7 +761,6 @@
                 <a href="login.html" class="btn-primary-med">🔑 Đăng nhập ngay</a>
             </div>
         </div>
-        <!-- Schedule content (only for logged in) -->
         <div id="schedule-content" style="display:none">
             <section style="position:relative;z-index:1;padding:40px 0 80px">
                 <div class="container">
@@ -234,12 +792,12 @@
                                     <div class="spinner-med"></div>
                                 </div>
                             </div>
-                            <div class="glass-card p-4" style="border-color:rgba(0,212,170,0.2)">
+                            <div class="glass-card p-4" style="border-color:rgba(0,212,170,.2)">
                                 <h6
                                     style="font-family:'Sora',sans-serif;font-weight:700;margin-bottom:12px;color:var(--primary)">
                                     💡 Lưu ý quan trọng</h6>
                                 <ul
-                                    style="list-style:none;padding:0;margin:0;font-size:0.84rem;line-height:2;color:var(--text-secondary)">
+                                    style="list-style:none;padding:0;margin:0;font-size:.84rem;line-height:2;color:var(--text-secondary)">
                                     <li>💊 Uống đúng liều, đúng giờ</li>
                                     <li>🍽️ Một số thuốc cần uống sau ăn</li>
                                     <li>💧 Uống với nhiều nước</li>
@@ -262,8 +820,6 @@
                     <h2 class="section-title">💊 Thuốc & Sản phẩm y tế</h2>
                     <p class="section-sub">Tra cứu thông tin chi tiết các loại thuốc và sản phẩm chăm sóc sức khỏe</p>
                 </div>
-
-                <!-- Category filter -->
                 <div class="med-category-bar mb-4">
                     <button class="med-cat-btn active" data-cat="all">🔘 Tất cả</button>
                     <button class="med-cat-btn" data-cat="painkiller">💊 Giảm đau / Hạ sốt</button>
@@ -273,16 +829,11 @@
                     <button class="med-cat-btn" data-cat="heart">❤️ Tim mạch</button>
                     <button class="med-cat-btn" data-cat="device">🩺 Thiết bị y tế</button>
                 </div>
-
-                <!-- Search inside medicines -->
                 <div class="search-wrap mb-4" style="max-width:400px">
                     <span class="search-icon"><i class="bi bi-search"></i></span>
                     <input type="text" id="med-search-input" placeholder="Tìm thuốc, sản phẩm..." />
                 </div>
-
-                <div class="row g-4" id="med-catalog-grid">
-                    <!-- Populated by JS -->
-                </div>
+                <div class="row g-4" id="med-catalog-grid"></div>
             </div>
         </section>
     </div>
@@ -295,7 +846,6 @@
                     <h2 class="section-title">📰 Tin tức & Thông tin y tế</h2>
                     <p class="section-sub">Cập nhật các chủ đề hot và thông tin chuyên ngành y tế mới nhất</p>
                 </div>
-                <!-- Topic pills -->
                 <div class="filter-pills mb-4">
                     <button class="pill-btn active" data-news-cat="all" onclick="filterNews('all',this)">🔘 Tất
                         cả</button>
@@ -310,9 +860,7 @@
                     <button class="pill-btn" data-news-cat="policy" onclick="filterNews('policy',this)">📋 Chính
                         sách</button>
                 </div>
-                <div class="row g-4" id="news-grid">
-                    <!-- Populated by JS -->
-                </div>
+                <div class="row g-4" id="news-grid"></div>
             </div>
         </section>
     </div>
@@ -327,13 +875,14 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+                    <img id="detail-med-img" src="" alt="" style="display:none" onerror="this.style.display='none'" />
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="detail-label">Dạng thuốc</div>
                             <div class="detail-val" id="detail-med-type">–</div>
                         </div>
                         <div class="col-md-6">
-                            <div class="detail-label">Danh mục</div>
+                            <div class="detail-label">Thương hiệu</div>
                             <div class="detail-val" id="detail-med-cat">–</div>
                         </div>
                         <div class="col-md-6">
@@ -344,28 +893,32 @@
                             <div class="detail-label">Tần suất sử dụng</div>
                             <div class="detail-val" id="detail-med-freq">–</div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="detail-label">Giá tham khảo</div>
+                            <div class="detail-val" id="detail-med-price" style="color:var(--primary);font-weight:600">–
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-label">Trạng thái</div><span id="detail-med-status"></span>
+                        </div>
                         <div class="col-12">
                             <div class="detail-label">Công dụng chính</div>
-                            <div style="background:rgba(0,212,170,0.06);border-left:3px solid var(--primary);padding:12px 16px;border-radius:8px;font-size:.88rem;line-height:1.7"
+                            <div style="background:rgba(0,212,170,.06);border-left:3px solid var(--primary);padding:12px 16px;border-radius:8px;font-size:.88rem;line-height:1.7"
                                 id="detail-med-uses">–</div>
                         </div>
                         <div class="col-12">
                             <div class="detail-label">Tác dụng phụ thường gặp</div>
-                            <div style="background:rgba(255,107,157,0.06);border-left:3px solid var(--accent);padding:12px 16px;border-radius:8px;font-size:.88rem;line-height:1.7"
+                            <div style="background:rgba(255,107,157,.06);border-left:3px solid var(--accent);padding:12px 16px;border-radius:8px;font-size:.88rem;line-height:1.7"
                                 id="detail-med-side">–</div>
                         </div>
                         <div class="col-12">
                             <div class="detail-label">Lưu ý đặc biệt</div>
-                            <div style="background:rgba(255,193,7,0.06);border-left:3px solid #ffc107;padding:12px 16px;border-radius:8px;font-size:.88rem;line-height:1.7"
+                            <div style="background:rgba(255,193,7,.06);border-left:3px solid #ffc107;padding:12px 16px;border-radius:8px;font-size:.88rem;line-height:1.7"
                                 id="detail-med-note">–</div>
                         </div>
                         <div class="col-md-6">
                             <div class="detail-label">Bảo quản</div>
                             <div class="detail-val" id="detail-med-store">–</div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="detail-label">Trạng thái</div>
-                            <span id="detail-med-status"></span>
                         </div>
                     </div>
                 </div>
@@ -398,10 +951,10 @@
                     <a href="login.html" class="footer-link">Đăng nhập</a>
                 </div>
                 <div class="col-6 col-md-2">
-                    <div class="footer-title">Quản trị</div>
+                    <div class="footer-title">Hỗ trợ</div>
+                    <a href="#" class="footer-link" onclick="toggleChatbot();switchChatbotTab('faq')">FAQ</a>
+                    <a href="#" class="footer-link" onclick="toggleChatbot();switchChatbotTab('contact')">Liên hệ</a>
                     <a href="admin.html" class="footer-link">Trang Admin</a>
-                    <a href="admin.html" class="footer-link">Quản lý thuốc</a>
-                    <a href="admin.html" class="footer-link">Bệnh nhân</a>
                 </div>
                 <div class="col-md-4">
                     <div class="footer-title">Thông tin</div>
@@ -421,38 +974,78 @@
         </div>
     </footer>
 
-    <!-- ═══ CHATBOT ═══ -->
+    <!-- ═══ CHATBOT FAB ═══ -->
     <button class="chatbot-fab" onclick="toggleChatbot()" aria-label="Bác sĩ ảo">
         🩺<div class="fab-badge" id="chat-badge">1</div>
     </button>
+
+    <!-- ═══ CHATBOT WINDOW ═══ -->
     <div class="chatbot-window" id="chatbot-window">
+        <!-- Header -->
         <div class="chatbot-header">
             <div class="chatbot-avatar">
                 <div class="chatbot-icon">🩺</div>
                 <div>
-                    <div class="chatbot-name">Bác sĩ ảo MedBot</div>
-                    <div class="chatbot-status">🟢 Trực tuyến – Hỗ trợ 24/7</div>
+                    <div class="chatbot-name">MedReminder Hỗ Trợ</div>
+                    <div class="chatbot-status">🟢 Nhân viên đang trực tuyến</div>
                 </div>
             </div>
             <button class="chatbot-close" onclick="toggleChatbot()">✕</button>
         </div>
-        <div class="chatbot-body" id="chatbot-body">
-            <div class="cb-bubble cb-bot">Xin chào! Tôi là Bác sĩ ảo MedBot 👋<br /><br />Tôi có thể giúp bạn:<br />•
-                Tra cứu lịch uống thuốc<br />• Tư vấn về cách dùng thuốc<br />• Hỏi về tác dụng phụ<br /><br />Bạn cần
-                hỗ trợ gì?</div>
+
+        <!-- Tabs: Chat / FAQ / Liên hệ -->
+        <div class="cb-tabs">
+            <button class="cb-tab-btn active" id="cb-tab-chat" onclick="switchChatbotTab('chat')">
+                💬 Chat
+            </button>
+            <button class="cb-tab-btn" id="cb-tab-faq" onclick="switchChatbotTab('faq')">
+                ❓ FAQ
+            </button>
+            <button class="cb-tab-btn" id="cb-tab-contact" onclick="switchChatbotTab('contact')">
+                📞 Liên hệ
+            </button>
         </div>
-        <div class="chatbot-quick">
-            <button class="cb-quick-btn" onclick="cbQuick('Lịch uống thuốc hôm nay của tôi?')">📅 Lịch hôm nay</button>
-            <button class="cb-quick-btn" onclick="cbQuick('Paracetamol uống như thế nào?')">💊 Paracetamol</button>
-            <button class="cb-quick-btn" onclick="cbQuick('Uống thuốc trước hay sau ăn?')">🍽️ Cách dùng</button>
-            <button class="cb-quick-btn" onclick="cbQuick('Tác dụng phụ của Amoxicillin là gì?')">⚠️ Tác dụng
-                phụ</button>
-            <button class="cb-quick-btn" onclick="cbQuick('Tôi quên uống thuốc phải làm sao?')">❓ Quên uống</button>
+
+        <!-- Pane: Chat -->
+        <div id="cb-pane-chat" style="display:flex;flex-direction:column;flex:1">
+            <div class="chatbot-body" id="chatbot-body">
+                <div class="cb-bubble cb-bot">Xin chào! Tôi là Bác sĩ ảo MedBot 👋<br /><br />Hỏi tôi về bất kỳ loại
+                    thuốc nào — Paracetamol, Amoxicillin, Amlodipine... hoặc xem FAQ để tìm câu trả lời nhanh!</div>
+            </div>
+            <div class="chatbot-quick">
+                <button class="cb-quick-btn" onclick="cbQuick('Lịch uống thuốc hôm nay của tôi?')">📅 Lịch hôm
+                    nay</button>
+                <button class="cb-quick-btn" onclick="cbQuick('Paracetamol uống như thế nào?')">💊 Paracetamol</button>
+                <button class="cb-quick-btn" onclick="cbQuick('Amoxicillin là thuốc gì?')">🧫 Amoxicillin</button>
+                <button class="cb-quick-btn" onclick="cbQuick('Uống thuốc trước hay sau ăn?')">🍽️ Cách dùng</button>
+                <button class="cb-quick-btn" onclick="cbQuick('Tôi quên uống thuốc phải làm sao?')">❓ Quên uống</button>
+                <button class="cb-quick-btn" onclick="cbQuick('Tác dụng phụ của Ibuprofen?')">⚠️ Tác dụng phụ</button>
+            </div>
+            <div class="chatbot-input-row">
+                <input class="chatbot-input" id="chatbot-input" placeholder="Nhập tên thuốc hoặc câu hỏi..."
+                    onkeydown="if(event.key==='Enter')cbSend()" />
+                <button class="chatbot-send" onclick="cbSend()">➤</button>
+            </div>
         </div>
-        <div class="chatbot-input-row">
-            <input class="chatbot-input" id="chatbot-input" placeholder="Nhập câu hỏi..."
-                onkeydown="if(event.key==='Enter')cbSend()" />
-            <button class="chatbot-send" onclick="cbSend()">➤</button>
+
+        <!-- Pane: FAQ -->
+        <div id="cb-pane-faq" style="display:none">
+            <div id="faq-list"></div>
+        </div>
+
+        <!-- Pane: Liên hệ -->
+        <div id="cb-pane-contact" style="display:none">
+            <div class="contact-info-block">
+                <div>📍 <strong>Địa chỉ:</strong> 123 Đường Y tế, Hà Nội</div>
+                <div>📞 <strong>Hotline:</strong> 1800-1234 (Miễn phí, 8:00–22:00)</div>
+                <div>📧 <strong>Email:</strong> support@medreminder.vn</div>
+                <div>⏰ <strong>Trực tuyến:</strong> T2–T7, 8:00–18:00</div>
+            </div>
+            <input type="text" class="cb-input-field" id="contact-name" placeholder="Họ và tên của bạn *" />
+            <input type="email" class="cb-input-field" id="contact-email" placeholder="Email (không bắt buộc)" />
+            <textarea class="cb-input-field" id="contact-msg" placeholder="Nội dung cần hỗ trợ *" rows="3"></textarea>
+            <button class="cb-submit-btn" onclick="submitContact()">📤 Gửi yêu cầu hỗ trợ</button>
+            <div id="contact-result"></div>
         </div>
     </div>
 
